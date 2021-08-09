@@ -1,0 +1,4 @@
+---
+- name: Installs mariadb client libs
+  apt:
+    pkg: "mariadb-server-client-{{ mariadb_version }}"

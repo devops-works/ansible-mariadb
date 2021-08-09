@@ -1,0 +1,19 @@
+---
+# mariadb Slaves Setup
+# We assume that, if a master slace setup is user, we bind to a specific interface
+
+- name: Sets mariadb master IP
+  set_fact:
+    __mariadb_master_ip: "{{ hostvars[mariadb_master_host]['ansible_' + mariadb_bind_interface]['ipv4']['address'] }}"
+
+- name: Adds required replication users
+  mysql_user:
+    login_user: root
+    login_password: "{{ mariadb_root_password }}"
+    name: "{{ mariadb_replication_user }}"
+    password: "{{ mariadb_replication_password }}"
+    priv: "*.*:REPLICATION SLAVE"
+    host: "{{ hostvars[item]['ansible_' + mariadb_bind_interface]['ipv4']['address'] }}"
+  with_items:
+    - "{{ groups[mariadb_slaves_group] }}"
+  delegate_to: "{{ mariadb_master_host }}"

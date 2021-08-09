@@ -1,0 +1,14 @@
+# MySQL integration
+
+init_config:
+
+instances:
+  - server: localhost
+    user: {{ mariadb_datadog_user }}
+    pass: {{ mariadb_datadog_password }}
+    sock: /var/run/mysqld/mysqld.sock
+    tags:
+        - pxc
+    options:
+        replication: {{ 1 if mariadb_master_host else 0 }}
+        galera_cluster: 0

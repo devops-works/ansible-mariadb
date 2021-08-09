@@ -1,0 +1,64 @@
+---
+# mariadb_backup:
+#  crontime: [cronentry] cron entry that triggers the backup
+#  keep: [number] how many backups do we keep
+#  destination: [destination] directory in the filesystem to put backups in
+#  s3bucket: [bucketaddess] when defined, this will trigger a
+#            sync from mariadb_backup.destination to s3 bucket
+#
+mariadb_additional_tools:
+  - mariadb-xtrabackup-24
+  - mariadb-toolkit
+mariadb_backup: false
+mariadb_backup_keep: 30
+mariadb_backup_s3bucket: ""
+mariadb_backup_gcloudbucket: ""
+mariadb_backup_destination: /var/backups/mysql/
+mariadb_backup_cron_time: "15 */2 * * 0-7"
+
+mariadb_bind_address: "127.0.0.1"
+# if defined, mariadb_bind_interface takes precedence over mariadb_bind_address
+# note that mariadb_bind_interface *must* be defined for master slave setup to work
+mariadb_bind_interface: false
+mariadb_monitoring_user: false
+mariadb_monitoring_password: false
+mariadb_ferm_enabled: ferm_enabled | default(false)
+mariadb_filter_allow_mariadb_port: []
+mariadb_key_buffer: "16M"
+mariadb_max_binlog_size: 100M
+mariadb_max_connections: 151
+# Max in-memory table size (seel also mariadb_tmp_table_size)
+mariadb_max_heap_table_size: 16777216
+mariadb_open_files_limit: 2565
+mariadb_port: 3306
+
+# Query cache tuning
+mariadb_query_cache_limit: 1M
+mariadb_query_cache_size: 16M
+mariadb_query_cache_strip_comments: 0
+# Cache is disabled by default
+mariadb_query_cache_type: 0
+
+mariadb_replication_user: false
+mariadb_replication_password: false
+mariadb_root_password: false
+# Can slaves act as masters ?
+mariadb_slaves_as_masters: false
+mariadb_slaves_group: false
+# Interface slaves are using to connect to the server
+mariadb_slaves_interface: "{{ mariadb_bind_interface }}"
+# Theads cache size
+mariadb_thread_cache_size: 8
+# mariadb MySQL temporary directory (for temp tables)
+mariadb_tmp_dir: /tmp
+# Max in-memory tmp table size.
+mariadb_tmp_table_size: 16777216
+# mariadb user list
+# This should be set by you application, not here
+mariadb_users: []
+# mariadb_users:
+#   - name: foo,
+#     password: "bar",
+#     priv: "*.*:ALL"
+#     host: "somehost"
+mariadb_version: 5.7
