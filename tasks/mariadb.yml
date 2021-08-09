@@ -27,13 +27,13 @@
   apt:
     pkg: "python-mysqldb"
     state: present
-  ignore_errors: yes
+  when: ansible_facts.python.version.major == 2
 
 - name: Adds Python3 MySQL support
   apt:
     pkg: "python3-mysqldb"
     state: present
-  ignore_errors: yes
+  when: ansible_facts.python.version.major == 3
 
 # # In this case, mysql_user will fail connecting to mysql
 # - name: Sets the root password (first attempt / failure is ok)
