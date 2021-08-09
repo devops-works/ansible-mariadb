@@ -6,9 +6,8 @@
 #  s3bucket: [bucketaddess] when defined, this will trigger a
 #            sync from mariadb_backup.destination to s3 bucket
 #
-mariadb_additional_tools:
-  - mariadb-xtrabackup-24
-  - mariadb-toolkit
+mariadb_additional_tools: []
+
 mariadb_backup: false
 mariadb_backup_keep: 30
 mariadb_backup_s3bucket: ""

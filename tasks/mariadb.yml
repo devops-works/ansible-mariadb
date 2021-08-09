@@ -6,7 +6,7 @@
 
 - name: Installs mariadb-server
   apt:
-    pkg: "mariadb-server"
+    pkg: "mariadb-server-{{ mariadb_version }}"
     state: present
 
 - name: Installs additional tools
