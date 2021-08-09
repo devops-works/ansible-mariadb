@@ -1,0 +1,5 @@
+.vagrant/
+*console.log
+molecule*
+Vagrantfile
+/tests/*

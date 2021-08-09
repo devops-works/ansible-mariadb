@@ -4,31 +4,9 @@
 #
 #
 
-- name: Adds mariadb key
-  apt_key:
-    keyserver: keys.gnupg.net
-    id: 8507EFA5
-
-- name: Adds mariadb repositories
-  apt_repository:
-    repo: 'deb http://repo.mariadb.com/apt {{ ansible_distribution_release }} main'
-    state: present
-
-# debconf-get-selections | grep mariadb
-- name: Sets root password
-  debconf:
-    name: "mariadb-server-server-{{ mariadb_version }}"
-    question: "{{ item }}"
-    value: "{{ mariadb_root_password }}"
-    vtype: 'password'
-  changed_when: false
-  with_items:
-    - 'mariadb-server-server/root_password'
-    - 'mariadb-server-server/root_password_again'
-
 - name: Installs mariadb-server
   apt:
-    pkg: "mariadb-server-server-{{ mariadb_version }}"
+    pkg: "mariadb-server"
     state: present
 
 - name: Installs additional tools
@@ -39,7 +17,7 @@
 - name: Adds mysql config
   template:
     src: "../templates/my.cnf.j2"
-    dest: "/etc/mysql/my.cnf"
+    dest: "/etc/mysql/mariadb.conf.d/99-ansible.cnf"
   notify: Restart mariadb
   tags: mariadb:config
 
