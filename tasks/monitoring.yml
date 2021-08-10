@@ -3,7 +3,7 @@
   mysql_user:
     name: "{{ mariadb_monitoring_user }}"
     password: "{{ mariadb_monitoring_password }}"
-    priv: "*.*:REPLICATION CLIENT,PROCESS"
+    priv: '*.*:PROCESS/*.*:REPLICATION CLIENT/performance_schema.*:SELECT'
     host: "{{ item }}"
     state: present
   with_items:
