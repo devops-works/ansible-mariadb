@@ -17,3 +17,12 @@
   with_items:
     - "{{ groups[mariadb_slaves_group] }}"
   delegate_to: "{{ mariadb_master_host }}"
+
+- name: Displays config help
+  debug:
+    msg: |
+      CHANGE MASTER TO MASTER_USER='{{ mariadb_replication_user }}',
+        MASTER_PASSWORD='{{ mariadb_replication_password }}',
+        MASTER_LOG_FILE=CHANGEME,
+        MASTER_LOG_POS=CHANGEME,
+        MASTER_HOST='{{ __mariadb_master_ip }}';
