@@ -44,7 +44,11 @@
   when: __new_datadir is changed
 
 - name: Initialize datadir if new
-  command: "mysql_install_db --datadir={{ mariadb_data_dir }}"
+  command: >
+    /usr/bin/mysql_install_db --datadir={{ mariadb_data_dir }} 
+    --auth-root-authentication-method=socket
+    --rpm --cross-bootstrap --user=mysql
+    --disable-log-bin  --skip-test-db
   when: __new_datadir is changed
 
 - name: Restart mariadb if necessary
