@@ -16,12 +16,26 @@
 
 - name: Adds mysql config
   template:
-    src: "../templates/my.cnf.j2"
-    dest: "/etc/mysql/mariadb.conf.d/99-ansible.cnf"
+    src: my.cnf.j2
+    dest: /etc/mysql/mariadb.conf.d/99-ansible.cnf
+    owner: root
+    group: root
+    mode: 0644
   notify: Restart mariadb
   tags: mariadb:config
 
-- meta: flush_handlers
+- name: Creates data directory
+  file:
+    state: directory
+    path: "{{ mariadb_data_dir }}"
+    owner: mysql
+    group: mysql
+    mode: 0755
+  notify: Restart mariadb
+  tags: mariadb:config
+
+- name: Restart mariadb if necessary
+  meta: flush_handlers
 
 - name: Adds Python2 MySQL support
   apt:
@@ -44,7 +58,7 @@
 
 - name: Configures for easy access as root user
   template:
-    src: "../templates/root_my.cnf.j2"
+    src: root_my.cnf.j2
     dest: /root/.my.cnf
     mode: 0600
 
@@ -115,8 +129,11 @@
 
 - name: Adds ferm filtering
   template:
-    src: "../templates/ferm.j2"
+    src: ferm.j2
     dest: /etc/ferm/filter-input.d/60_mysql.conf
+    mode: 0644
+    owner: root
+    group: root
   when: mariadb_ferm_enabled
   tags: ferm
   notify: Restart ferm
