@@ -36,6 +36,7 @@ socket	= /var/run/mysqld/mysqld.sock
 socket	= /var/run/mysqld/mysqld.sock
 nice		= 0
 open_files_limit = {{ mariadb_open_files_limit }}
+
 [mysqld]
 #
 # * Basic Settings
@@ -51,7 +52,7 @@ user		  = mysql
 socket		= /var/run/mysqld/mysqld.sock
 port		  = {{ mariadb_port }}
 basedir		= /usr
-datadir		= /var/lib/mysql
+datadir		= {{ mariadb_data_dir }}
 tmpdir		= {{ mariadb_tmp_dir }}
 skip-external-locking
 skip-name-resolve

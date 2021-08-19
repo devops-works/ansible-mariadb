@@ -19,14 +19,15 @@ mariadb_bind_address: "127.0.0.1"
 # if defined, mariadb_bind_interface takes precedence over mariadb_bind_address
 # note that mariadb_bind_interface *must* be defined for master slave setup to work
 mariadb_bind_interface: false
-mariadb_monitoring_user: false
-mariadb_monitoring_password: false
+mariadb_data_dir: /var/lib/mysql
 mariadb_ferm_enabled: ferm_enabled | default(false)
 mariadb_filter_allow_mariadb_port: []
 mariadb_key_buffer: "16M"
 mariadb_max_binlog_size: 100M
 mariadb_max_connections: 151
-# Max in-memory table size (seel also mariadb_tmp_table_size)
+mariadb_monitoring_user: false
+mariadb_monitoring_password: false
+# Max in-memory table size (see also mariadb_tmp_table_size)
 mariadb_max_heap_table_size: 16777216
 mariadb_open_files_limit: 2565
 mariadb_port: 3306
