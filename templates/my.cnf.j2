@@ -81,6 +81,10 @@ myisam-recover         = BACKUP
 {% endif %}
 max_connections        = {{ mariadb_max_connections }}
 
+{% if mariadb_sql_mode %}
+sql_mode='{{ mariadb_sql_mode }}'
+{% endif %}
+
 #table_cache            = 64
 #thread_concurrency     = 10
 #
