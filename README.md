@@ -36,6 +36,8 @@ master slave setup to work.
 All variables below are their MySQL equivalent.
 
 - `mariadb_bind_address` (default: "127.0.0.1")
+- `mariadb_character_set_server` (default: none)
+- `mariadb_collation_server` (default: none)
 - `mariadb_key_buffer` (default: "16M")
 - `mariadb_master_host` (default: undefined)
 - `mariadb_max_binlog_size` (default: 100M)
@@ -48,6 +50,7 @@ All variables below are their MySQL equivalent.
 - `mariadb_query_cache_strip_comments` (default: 0)
 - `mariadb_query_cache_type` (default: 0)
 - `mariadb_server_id` (default: none)
+- `mariadb_sql_mode` (default: none)
 - `mariadb_thread_cache_size` (default: 8)
 - `mariadb_tmp_dir` (default: /tmp)
 - `mariadb_tmp_table_size` (default: 16777216)

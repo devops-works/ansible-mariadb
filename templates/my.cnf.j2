@@ -85,6 +85,14 @@ max_connections        = {{ mariadb_max_connections }}
 sql_mode='{{ mariadb_sql_mode }}'
 {% endif %}
 
+{% if mariadb_character_set_server %}
+character-set-server  = {{ mariadb_character_set_server }}
+{% endif %}
+
+{% if mariadb_collation_server %}
+collation-server      = {{ mariadb_collation_server }}
+{% endif %}
+
 #table_cache            = 64
 #thread_concurrency     = 10
 #
