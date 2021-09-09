@@ -17,8 +17,20 @@ MySQLdb python package (required by `mysql_*` Ansible modules)
 
 ### Backup
 
-Define `mariadb_backup` dict if you want to create database backups.
-It will install a backupscript in `/etc/backup.d/hourly`. See https://github.com/devops-works/ansible-backupninja for automation.
+Define `mariadb_backup_*` variables if you want to create database backups.
+It will install a backupscript in `/etc/backup.d/hourly`.
+
+- `mariadb_backup` (default: false): whether to run database backups
+- `mariadb_backup_exclude` (default: ""): `grep` exclude pattern for databases
+- `mariadb_backup_keep` (default: 30): how many backups do we keep locally
+- `mariadb_backup_s3bucket` (default: ""): S3 bucket to export backups to
+- `mariadb_backup_gcloudbucket` (default: ""): GCS bucket to export backups to
+- `mariadb_backup_destination` (default: "/var/backups/mysql/"): path to store
+  local backups in
+- `mariadb_backup_cron_time` (default: "15 */2 * * 0-7"): cron entry for
+  backups
+- `mariadb_backup_gpg_keys_urls` (default: []): list of gpg keys URLS to
+  encrypt backups for
 
 ### MySQL config related variables
 

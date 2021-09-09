@@ -8,7 +8,7 @@ instances:
     pass: {{ mariadb_datadog_password }}
     sock: /var/run/mysqld/mysqld.sock
     tags:
-        - pxc
+        - mariadb
     options:
         replication: {{ 1 if mariadb_master_host else 0 }}
         galera_cluster: 0

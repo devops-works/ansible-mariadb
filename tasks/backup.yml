@@ -9,7 +9,17 @@
     dest: /etc/backup.d/hourly/20_backup_all_mysql_databases.sh
     mode: 0700
 
-- 
+- name: Ensure gpg is installed
+  apt:
+    pkg: gpg
+    state: present
+
+- name: Import public gpg keys
+  shell: "curl -s {{ item.url }} | gpg --import -"
+  changed_when: '"imported" in __mariadb_gpgkeys.output'
+  register: __mariadb_gpgkeys
+  loop: "{{ mariadb_backup_gpg_keys }}"
+
 - name: Ensures backup destination exists
   file:
     path: "{{ mariadb_backup_destination }}"
