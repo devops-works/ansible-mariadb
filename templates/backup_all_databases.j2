@@ -1,6 +1,5 @@
-#!/bin/bash
-
 #!/usr/bin/env bash
+
 #
 # {{ ansible_managed }}
 #
@@ -12,56 +11,62 @@ PASS="{{ mariadb_root_password }}"
 
 EXCLUDE="{{ mariadb_backup_exclude }}"
 
-GPG_RCPT={% for entry in mariadb_backup_gpg_keys %}--recipient {{ entry.id }} {% endfor %}
+GPG_RCPT="{% for entry in mariadb_backup_gpg_keys %}--recipient {{ entry.id }} {% endfor %}"
 
 DB=$(echo "SHOW DATABASES;" | mysql --password="${PASS}" | tail -n +2 | grep -v information_schema | grep -v performance_schema | grep -v "${EXCLUDE}")
-for j in "${DB}"; do
-  [[ $1 == '-v' ]] && echo -n "Backuping ${j}..." 
+for j in ${DB}; do
+  [[ $1 == '-v' ]] && echo -n "Database ${j}...backup..." 
   DATE=$(date +%Y%m%d_%H%M%S)
   mysqldump --password="${PASS}" ---routines --triggers --single-transaction "${j}" 2> /tmp/error | zstd > "${DEST}/$j-${DATE}.sql.zst"
   if [ $? != 0 ]; then
     echo "Error backuping (mysqldump) ${j} :"
     cat /tmp/error
     echo
-  else
-    [[ $1 == '-v' ]] && echo done
   fi
 
   # Encrypt backups
   if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
     # Encrypt
-    gpg --encrypt ${GPG_RCPT} "${DEST}/$j-${DATE}.sql.zst"
+    [[ $1 == '-v' ]] && echo -n "encrypting..." 
+    gpg --encrypt ${GPG_RCPT} --trust-model always "${DEST}/$j-${DATE}.sql.zst"
 
     # Remove old encrypted backups
-    COUNT=$(( `ls "${DEST}/${j}-*.zst.gpg" | wc -l` - ${KEEP} ))
+    # COUNT=$(( $(ls ${DEST}/${j}-*.zst.gpg | wc -l) - ${KEEP} ))
+    COUNT=$(( `ls $DEST/$j-*.gpg | wc -l` - $KEEP ))
     if [ ${COUNT} -gt 0 ]; then
-      [[ $1 == '-v' ]] && echo "Erasing ${COUNT} old encrypted backups (mysqldump+gpg) for $j"
-      for i in $(ls "${DEST}/${j}-*.zst.gpg" | head -${COUNT}); do
+      [[ $1 == '-v' ]] && echo -n "purging ${COUNT} encrypted..."
+      for i in `ls $DEST/$j-*.gpg | head -$COUNT`; do
         rm $i
       done
     fi
   fi
 
   # remove older backups for mysqldump
-  COUNT=$(( `ls  "${DEST}/${j}-*.zst" | wc -l` - ${KEEP} ))
+  # COUNT=$(( $(ls ${DEST}/${j}-*.zst | wc -l) - ${KEEP} ))
+  COUNT=$(( `ls $DEST/$j-*.zst | wc -l` - $KEEP ))
   if [ ${COUNT} -gt 0 ]; then
-    [[ $1 == '-v' ]] && echo "Erasing ${COUNT} old backups (mysqldump) for $j"
-    for i in $(ls "${DEST}/${j}-*.zst" | head -$COUNT); do
+      [[ $1 == '-v' ]] && echo -n "purging ${COUNT} clear..."
+    for i in `ls $DEST/$j-*.zst | head -$COUNT`; do
       rm $i
     done
   fi
 
-  PATTERN="*.gpg"
-  # Only copy encrypted backups if we encrypt them
-  if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
-    PATTERN="*.gpg"
-  fi
-
-  if [ -n "{{ mariadb_backup_s3bucket }}" ]; then
-    s3cmd sync --delete-removed ${DEST}/${PATTERN} s3://{{ mariadb_backup_s3bucket }}/
-  fi
-
-  if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
-    gsutil -m rsync -r ${DEST}/${PATTERN} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
-  fi
+  [[ $1 == '-v' ]] && echo "done"
 done
+
+PATTERN="*.gpg"
+# Only copy encrypted backups if we encrypt them
+if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
+  PATTERN="*.gpg"
+fi
+
+if [ -n "{{ mariadb_backup_s3bucket }}" ]; then
+  [[ $1 == '-v' ]] && echo -n "syncing to s3://{{ mariadb_backup_s3bucket }}..."
+  s3cmd sync --delete-removed ${DEST}/${PATTERN} s3://{{ mariadb_backup_s3bucket }}/
+fi
+
+if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
+  [[ $1 == '-v' ]] && echo -n "syncing to gs://{{ mariadb_backup_gcloudbucket }}..."
+  gsutil -m rsync -r ${DEST}/${PATTERN} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
+  [[ $1 == '-v' ]] && echo "done"
+fi

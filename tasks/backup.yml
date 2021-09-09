@@ -5,9 +5,11 @@
 #
 - name: Installs backup script
   template:
-    src: "../templates/backup_all_databases.j2"
-    dest: /etc/backup.d/hourly/20_backup_all_mysql_databases.sh
+    src: backup_all_databases.j2
+    dest: /usr/local/bin/database_backup
     mode: 0700
+    owner: root
+    group: root
 
 - name: Ensure gpg is installed
   apt:
@@ -15,10 +17,13 @@
     state: present
 
 - name: Import public gpg keys
-  shell: "curl -s {{ item.url }} | gpg --import -"
-  changed_when: '"imported" in __mariadb_gpgkeys.output'
+  shell: "curl -s {{ item.url }} | gpg --import --trust-model always -"
+  args:
+    warn: no
+  changed_when: '"imported" in __mariadb_gpgkeys.stderr'
   register: __mariadb_gpgkeys
   loop: "{{ mariadb_backup_gpg_keys }}"
+  tags: keys
 
 - name: Ensures backup destination exists
   file:
@@ -27,7 +32,10 @@
     mode: 0700
     owner: root
 
-- name: Remove old backup method crontab entry
-  file:
-    path: /etc/cron.d/backup_all_databases
-    state: 'absent'
+- name: Add cron entry
+  template:
+    src: cron.j2
+    dest: /etc/cron.d/database_backup
+    owner: root
+    group: root
+    mode: 0644
