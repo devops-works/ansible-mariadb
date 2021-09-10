@@ -54,19 +54,19 @@ for j in ${DB}; do
   [[ $1 == '-v' ]] && echo "done"
 done
 
-PATTERN="*.gpg"
+EXCLUDES=""
 # Only copy encrypted backups if we encrypt them
 if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
-  PATTERN="*.gpg"
+  EXCLUDES='-x ".*\.zst$"'
 fi
 
 if [ -n "{{ mariadb_backup_s3bucket }}" ]; then
   [[ $1 == '-v' ]] && echo -n "syncing to s3://{{ mariadb_backup_s3bucket }}..."
-  s3cmd sync --delete-removed ${DEST}/${PATTERN} s3://{{ mariadb_backup_s3bucket }}/
+  s3cmd sync ${DEST} s3://{{ mariadb_backup_s3bucket }}/
 fi
 
 if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
   [[ $1 == '-v' ]] && echo -n "syncing to gs://{{ mariadb_backup_gcloudbucket }}..."
-  gsutil -m rsync -r ${DEST}/${PATTERN} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
+  gsutil -m rsync ${EXCLUDES} -r ${DEST}/${PATTERN} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
   [[ $1 == '-v' ]] && echo "done"
 fi
