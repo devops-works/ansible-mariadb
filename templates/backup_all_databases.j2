@@ -6,7 +6,10 @@
 
 # How many backups to keep
 KEEP={{ mariadb_backup_keep }}
+
 DEST="{{ mariadb_backup_destination }}"
+DEST_ENCRYPTED="{{ mariadb_backup_destination }}/gpg"
+
 PASS="{{ mariadb_root_password }}"
 
 EXCLUDE="{{ mariadb_backup_exclude }}"
@@ -29,13 +32,13 @@ for j in ${DB}; do
     # Encrypt
     [[ $1 == '-v' ]] && echo -n "encrypting..." 
     gpg --encrypt ${GPG_RCPT} --trust-model always "${DEST}/$j-${DATE}.sql.zst"
-
+    mv "${DEST}/$j-${DATE}.sql.zst.gpg" ${DEST_ENCRYPTED}/
     # Remove old encrypted backups
-    # COUNT=$(( $(ls ${DEST}/${j}-*.zst.gpg | wc -l) - ${KEEP} ))
-    COUNT=$(( `ls $DEST/$j-*.gpg | wc -l` - $KEEP ))
+    # COUNT=$(( $(ls ${DEST_ENCRYPTED}/${j}-*.zst.gpg | wc -l) - ${KEEP} ))
+    COUNT=$(( `ls $DEST_ENCRYPTED/$j-*.gpg | wc -l` - $KEEP ))
     if [ ${COUNT} -gt 0 ]; then
       [[ $1 == '-v' ]] && echo -n "purging ${COUNT} encrypted..."
-      for i in `ls $DEST/$j-*.gpg | head -$COUNT`; do
+      for i in `ls $DEST_ENCRYPTED/$j-*.gpg | head -$COUNT`; do
         rm $i
       done
     fi
@@ -54,19 +57,19 @@ for j in ${DB}; do
   [[ $1 == '-v' ]] && echo "done"
 done
 
-EXCLUDES=""
+SOURCE="${DEST}"
 # Only copy encrypted backups if we encrypt them
 if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
-  EXCLUDES='-x ".*\.zst$"'
+  SOURCE="${DEST_ENCRYPTED}"
 fi
 
 if [ -n "{{ mariadb_backup_s3bucket }}" ]; then
   [[ $1 == '-v' ]] && echo -n "syncing to s3://{{ mariadb_backup_s3bucket }}..."
-  s3cmd sync ${DEST} s3://{{ mariadb_backup_s3bucket }}/
+  s3cmd sync ${SOURCE} s3://{{ mariadb_backup_s3bucket }}/
 fi
 
 if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
   [[ $1 == '-v' ]] && echo -n "syncing to gs://{{ mariadb_backup_gcloudbucket }}..."
-  gsutil -m rsync ${EXCLUDES} -r ${DEST}/${PATTERN} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
+  gsutil -m rsync -r ${SOURCE} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
   [[ $1 == '-v' ]] && echo "done"
 fi

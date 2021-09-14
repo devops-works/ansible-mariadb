@@ -32,6 +32,13 @@
     mode: 0700
     owner: root
 
+- name: Ensures encrypted backup destination exists
+  file:
+    path: "{{ mariadb_backup_destination }}/gpg"
+    state: directory
+    mode: 0700
+    owner: root
+
 - name: Add cron entry
   template:
     src: cron.j2
