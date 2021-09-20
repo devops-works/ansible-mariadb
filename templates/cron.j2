@@ -7,7 +7,7 @@ INFLUX_URL={{ telegraf_output_influxdb.urls.0 }}
 INFLUX_TAGS="customer=saas,env={{ clevehr_env }},type=backup"
 INFLUX_USER="{{ telegraf_output_influxdb.username }}"
 INFLUX_PASS="{{ telegraf_output_influxdb.password }}"
-{{ mariadb_backup_cron_time }} root /usr/local/bin/influxevent /usr/local/bin/database_backup -timeout 7200 -period 1000 > /var/log/dbbackup.log
+{{ mariadb_backup_cron_time }} root /usr/local/bin/influxevent -timeout 7200 -period 1000 -- /usr/local/bin/database_backup > /var/log/dbbackup.log
 {% else %}
 {{ mariadb_backup_cron_time }} root /usr/local/bin/database_backup -timeout 7200 -period 1000 > /var/log/dbbackup.log
 {% endif %}
