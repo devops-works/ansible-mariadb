@@ -2,7 +2,7 @@
 MAILTO=""
 {% if telegraf_output_influxdb %}
 INFLUX_MEASUREMENT=events
-INFLUX_DB=metrics
+INFLUX_DB={{ telegraf_output_influxdb.database | default "metrics" }}
 INFLUX_URL={{ telegraf_output_influxdb.urls.0 }}
 INFLUX_TAGS="customer=saas,env={{ clevehr_env }},type=backup"
 INFLUX_USER="{{ telegraf_output_influxdb.username }}"
