@@ -66,10 +66,21 @@ fi
 if [ -n "{{ mariadb_backup_s3bucket }}" ]; then
   [[ $1 == '-v' ]] && echo -n "syncing to s3://{{ mariadb_backup_s3bucket }}..."
   s3cmd sync ${SOURCE} s3://{{ mariadb_backup_s3bucket }}/
+  if [ $? -gt 0 ]; then
+    echo -n "error syncing ${SOURCE} to s3://{{ mariadb_backup_s3bucket }}/"
+    exit 1
+  fi
+  [[ $1 == '-v' ]] && echo "done"
 fi
 
 if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
   [[ $1 == '-v' ]] && echo -n "syncing to gs://{{ mariadb_backup_gcloudbucket }}..."
   gsutil -m rsync -r ${SOURCE} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
+  if [ $? -gt 0 ]; then
+    echo -n "error syncing ${SOURCE} to gs://{{ mariadb_backup_gcloudbucket }}"
+    exit 1
+  fi
   [[ $1 == '-v' ]] && echo "done"
 fi
+
+exit 0
