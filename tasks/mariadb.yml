@@ -103,7 +103,7 @@
     password: "{{ item.password }}"
     priv: "{{ item.privs }}"
   with_items: [ "{{ mariadb_users }}" ]
-  when: mariadb_users is defined
+  when: inventory_hostname == group_name[0]
 
 - name: Adds required MySQL users with hosts
   mysql_user:
@@ -112,25 +112,28 @@
     priv: "{{ item.privs }}"
     host: "{{ item.host }}"
   with_items: [ "{{ mariadb_users }}" ]
-  when: item.host is defined and mariadb_users is defined
+  when: item.host is defined and mariadb_users is defined and inventory_hostname == group_name[0]
 
 - name: Secures the MySQL root user for IPV6 localhost (::1)
   mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "::1"
+  when: inventory_hostname == group_name[0]
 
 - name: Secures the MySQL root user for IPV4 localhost (127.0.0.1)
   mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "127.0.0.1"
+  when: inventory_hostname == group_name[0]
 
 - name: Secures the MySQL root user for localhost domain (localhost)
   mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "localhost"
+  when: inventory_hostname == group_name[0]
 
 - name: Secures the MySQL root user for server_hostname domain
   mysql_user:
@@ -138,12 +141,13 @@
     password: "{{ mariadb_root_password }}"
     host: "{{ ansible_fqdn }}"
   failed_when: false
+  when: inventory_hostname == group_name[0]
 
 - name: Removes the MySQL test database
   mysql_db:
     db: test
     state: absent
-  notify: Restart mariadb
+  when: inventory_hostname == group_name[0]
 
 - name: Adds ferm filtering
   template:
