@@ -17,6 +17,9 @@ EXCLUDE="{{ mariadb_backup_exclude }}"
 GPG_RCPT="{% for entry in mariadb_backup_gpg_keys %}--recipient {{ entry.id }} {% endfor %}"
 
 DB=$(echo "SHOW DATABASES;" | mysql --password="${PASS}" | tail -n +2 | grep -v information_schema | grep -v performance_schema | grep -v "${EXCLUDE}")
+
+errors=0
+
 for j in ${DB}; do
   [[ $1 == '-v' ]] && echo -n "Database ${j}...backup..." 
   DATE=$(date +%Y%m%d_%H%M%S)
@@ -25,14 +28,15 @@ for j in ${DB}; do
     echo "Error backuping (mysqldump) ${j} :"
     cat /tmp/error
     echo
+    errors=$((errors + 1))
   fi
 
   # Encrypt backups
   if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
     # Encrypt
     [[ $1 == '-v' ]] && echo -n "encrypting..." 
-    gpg --encrypt ${GPG_RCPT} --trust-model always "${DEST}/$j-${DATE}.sql.zst"
-    mv "${DEST}/$j-${DATE}.sql.zst.gpg" ${DEST_ENCRYPTED}/
+    gpg --encrypt ${GPG_RCPT} --trust-model always "${DEST}/$j-${DATE}.sql.zst" || errors=$((errors + 1)) 
+    mv "${DEST}/$j-${DATE}.sql.zst.gpg" ${DEST_ENCRYPTED}/ || errors=$((errors + 1)) 
     # Remove old encrypted backups
     # COUNT=$(( $(ls ${DEST_ENCRYPTED}/${j}-*.zst.gpg | wc -l) - ${KEEP} ))
     COUNT=$(( `ls $DEST_ENCRYPTED/$j-*.gpg | wc -l` - $KEEP ))
@@ -81,6 +85,11 @@ if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
     exit 1
   fi
   [[ $1 == '-v' ]] && echo "done"
+fi
+
+if [ $errors -gt 0 ]; then
+  echo "$errors errors occured"
+  exit 1
 fi
 
 exit 0
