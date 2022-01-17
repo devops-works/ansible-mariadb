@@ -23,7 +23,7 @@ errors=0
 for j in ${DB}; do
   [[ $1 == '-v' ]] && echo -n "Database ${j}...backup..." 
   DATE=$(date +%Y%m%d_%H%M%S)
-  mysqldump --password="${PASS}" --routines --triggers --single-transaction "${j}" 2> /tmp/error | zstd > "${DEST}/$j-${DATE}.sql.zst"
+  mysqldump --password="${PASS}" --routines --triggers --single-transaction --dump-slave=2 "${j}" 2> /tmp/error | zstd > "${DEST}/$j-${DATE}.sql.zst"
   if [ $? != 0 ]; then
     echo "Error backuping (mysqldump) ${j} :"
     cat /tmp/error
