@@ -123,8 +123,9 @@ log_error                = /var/log/mysql/error.log
 #       other settings you may need to change.
 #server-id		= 1
 #log_bin			= /var/log/mysql/mysql-bin.log
-expire_logs_days  = 10
-max_binlog_size   = 100M
+expire_logs_days  = {{ mariadb_expire_logs_days }}
+max_binlog_size   = {{ mariadb_max_binlog_size }}
+
 #binlog_do_db		= include_database_name
 #binlog_ignore_db	= include_database_name
 
@@ -144,8 +145,6 @@ relay-log-index = {{ inventory_hostname }}-slave-relay-bin.index
 server-id     = 1
 log-bin       = master-bin
 log-bin-index = master-bin.index
-expire_logs_days  = 35
-max_binlog_size   = {{ mariadb_max_binlog_size }}
 {% else %}
 # Single host mode configured
 {% endif %}
