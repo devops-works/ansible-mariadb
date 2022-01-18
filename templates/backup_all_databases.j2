@@ -23,7 +23,6 @@ errors=0
 for j in ${DB}; do
   [[ $1 == '-v' ]] && echo -n "Database ${j}...backup..." 
   DATE=$(date +%Y%m%d_%H%M%S)
-{% if mariadb_slaves_as_masters
   mysqldump --password="${PASS}" --routines --triggers --single-transaction {{ mariadb_backup_additional_flag }} "${j}" 2> /tmp/error | zstd > "${DEST}/$j-${DATE}.sql.zst"
   if [ $? != 0 ]; then
     echo "Error backuping (mysqldump) ${j} :"
