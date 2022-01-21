@@ -119,7 +119,7 @@ log_error                = /var/log/mysql/error.log
 #log-queries-not-using-indexes
 #
 # The following can be used as easy to replay backup logs or for replication.
-# note: if you are setting up a replication slave, see README.Debian about
+# note: if you are setting up a replication node, see README.Debian about
 #       other settings you may need to change.
 #server-id		= 1
 #log_bin			= /var/log/mysql/mysql-bin.log
@@ -129,23 +129,23 @@ max_binlog_size   = {{ mariadb_max_binlog_size }}
 #binlog_do_db		= include_database_name
 #binlog_ignore_db	= include_database_name
 
-{% if mariadb_slaves_group and inventory_hostname in groups[mariadb_slaves_group] %}
+{% if mariadb_replicas_group and inventory_hostname in groups[mariadb_replicas_group] %}
 server-id = {{ mariadb_server_id }}
 read-only = 1
-{%   if mariadb_slaves_as_masters %}
-# slaves can act as masters
+{%   if mariadb_replicas_as_masters %}
+# replicas can act as masters
 {%     if mariadb_binlog_dir != mariadb_data_dir %}
-log-bin       = {{ mariadb_binlog_dir }}/slave-master-bin
-log-bin-index = {{ mariadb_binlog_dir }}/slave-master-bin.index
+log-bin       = {{ mariadb_binlog_dir }}/replica-master-bin
+log-bin-index = {{ mariadb_binlog_dir }}/replica-master-bin.index
 {%     else %}
-log-bin       = slave-master-bin
-log-bin-index = slave-master-bin.index
+log-bin       = replica-master-bin
+log-bin-index = replica-master-bin.index
 {%     endif %}
-log-slave-updates = 1
+log-replica-updates = 1
 {%   endif %}
 
-relay-log = {{ inventory_hostname }}-slave-relay-bin
-relay-log-index = {{ inventory_hostname }}-slave-relay-bin.index
+relay-log = {{ inventory_hostname }}-replica-relay-bin
+relay-log-index = {{ inventory_hostname }}-replica-relay-bin.index
 {% elif mariadb_master_host is defined and mariadb_master_host == inventory_hostname %}
 server-id     = 1
 {%   if mariadb_binlog_dir != mariadb_data_dir %}
