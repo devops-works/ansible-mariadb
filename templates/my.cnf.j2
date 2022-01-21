@@ -134,9 +134,9 @@ server-id = {{ mariadb_server_id }}
 read-only = 1
 {%   if mariadb_slaves_as_masters %}
 # slaves can act as masters
-{%     if mariadb_binlog_location != mariadb_data_dir %}
-log-bin       = {{ mariadb_binlog_location }}/slave-master-bin
-log-bin-index = {{ mariadb_binlog_location }}/slave-master-bin.index
+{%     if mariadb_binlog_dir != mariadb_data_dir %}
+log-bin       = {{ mariadb_binlog_dir }}/slave-master-bin
+log-bin-index = {{ mariadb_binlog_dir }}/slave-master-bin.index
 {%     else %}
 log-bin       = slave-master-bin
 log-bin-index = slave-master-bin.index
@@ -148,9 +148,9 @@ relay-log = {{ inventory_hostname }}-slave-relay-bin
 relay-log-index = {{ inventory_hostname }}-slave-relay-bin.index
 {% elif mariadb_master_host is defined and mariadb_master_host == inventory_hostname %}
 server-id     = 1
-{%   if mariadb_binlog_location != mariadb_data_dir %}
-log-bin       = {{ mariadb_binlog_location }}/master-bin
-log-bin-index = {{ mariadb_binlog_location }}/master-bin.index
+{%   if mariadb_binlog_dir != mariadb_data_dir %}
+log-bin       = {{ mariadb_binlog_dir }}/master-bin
+log-bin-index = {{ mariadb_binlog_dir }}/master-bin.index
 {%   else %}
 log-bin       = master-bin
 log-bin-index = master-bin.index

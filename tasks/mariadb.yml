@@ -37,6 +37,17 @@
   tags:
     - mariadb:config
 
+- name: Creates binlog directory
+  file:
+    state: directory
+    path: "{{ mariadb_binlog_dir }}"
+    owner: mysql
+    group: mysql
+    mode: 0755
+  notify: Restart mariadb
+  tags:
+    - mariadb:config
+
 - name: Stop mysql if datadir is new
   service:
     name: mariadb
