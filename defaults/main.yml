@@ -21,7 +21,7 @@ mariadb_bind_address: "127.0.0.1"
 # note that mariadb_bind_interface *must* be defined for master slave setup to work
 mariadb_bind_interface: false
 mariadb_data_dir: /var/lib/mysql
-mariadb_binlog_dir: {{mariadb_data_dir}}
+mariadb_binlog_dir: /var/lib/mysql
 mariadb_expire_logs_days: 1
 mariadb_ferm_enabled: ferm_enabled | default(false)
 mariadb_filter_allow_mariadb_port: []
