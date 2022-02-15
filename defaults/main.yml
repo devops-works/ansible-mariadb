@@ -18,7 +18,7 @@ mariadb_backup_additional_flag: "" # e.g. --dump-slave=2 or --master-data=2
 
 mariadb_bind_address: "127.0.0.1"
 # if defined, mariadb_bind_interface takes precedence over mariadb_bind_address
-# note that mariadb_bind_interface *must* be defined for master slave setup to work
+# note that mariadb_bind_interface *must* be defined for master replica setup to work
 mariadb_bind_interface: false
 mariadb_data_dir: /var/lib/mysql
 mariadb_binlog_dir: /var/lib/mysql

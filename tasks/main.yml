@@ -12,13 +12,13 @@
 # mysql_replication won't help you with replication
 # it is ok on a NEW server, but fails miserably on a running server
 # don't expect it to handle a proper binlog or logpos
-# so in the slave.yml tasks, all calls to mysql_replication have been removed
-- import_tasks: slave.yml
-  when: mariadb_master_host is defined and mariadb_master_host and mariadb_slaves_group in group_names
+# so in the replica.yml tasks, all calls to mysql_replication have been removed
+- import_tasks: replica.yml
+  when: mariadb_master_host is defined and mariadb_master_host and mariadb_replicas_group in group_names
   tags:
     - mariadb
     - mariadb:client
-    - mariadb:slaves
+    - mariadb:replicas
 
 - import_tasks: backup.yml
   when: mariadb_backup

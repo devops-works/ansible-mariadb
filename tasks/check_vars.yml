@@ -5,11 +5,11 @@
   with_items:
     - mariadb_root_password
 
-- name: Checking that required variables are set if master/slave setup
-  fail: msg="mariadb_slaves_group, perconna_replication_user and perconna_replication_password must be defined if mariadb_master_host is"
+- name: Checking that required variables are set if master/replica setup
+  fail: msg="mariadb_replicas_group, perconna_replication_user and perconna_replication_password must be defined if mariadb_master_host is"
   when: mariadb_master_host is defined and not item
   with_items:
     - mariadb_bind_interface
-    - mariadb_slaves_group
+    - mariadb_replicas_group
     - mariadb_replication_user
     - mariadb_replication_password
