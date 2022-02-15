@@ -81,7 +81,7 @@ myisam-recover         = BACKUP
 {% endif %}
 max_connections        = {{ mariadb_max_connections }}
 
-{% if mariadb_sql_mode %}
+{% if mariadb_sql_mode is defined %}
 sql_mode='{{ mariadb_sql_mode }}'
 {% endif %}
 
