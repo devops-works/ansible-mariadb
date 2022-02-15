@@ -41,7 +41,7 @@ other supported version is "5.5".
 
 If defined, `mariadb_bind_interface` takes precedence over
 `mariadb_bind_address`. Note that `mariadb_bind_interface` *must* be defined for
-master slave setup to work.
+master replica setup to work.
 
 #### my.cnf vars
 
@@ -88,10 +88,10 @@ Root's password can be set in `mariadb_root_password` (default: none,
 
 ### Replication
 
-If slaves can act as masters for other slaves, `mariadb_slaves_as_masters`
+If replicas can act as masters for other replicas, `mariadb_replicas_as_masters`
 should be set to true (default: false). 
 
-Also, for replication to be set-up, `mariadb_slaves_group` should point to an
+Also, for replication to be set-up, `mariadb_replicas_group` should point to an
 inventory group (default: false).
 
 ### Firewalling
@@ -103,8 +103,8 @@ names, group names or ip ranges. By default, it is empty (`[]`) which means mysq
 port will be filtered to all hosts.
 
 In order to set-up proper [ferm](https://galaxy.ansible.com/detail#/role/6120)
-rules, slaves network interface must be the same across all slaves, and should
-be named in `mariadb_slaves_interface` (default: "{{ mariadb_bind_interface
+rules, replicas network interface must be the same across all replicas, and should
+be named in `mariadb_replicas_interface` (default: "{{ mariadb_bind_interface
 }}"). If it is not set, the role will use `mariadb_bind_interface`.
 
 ### Monitoring support
@@ -118,7 +118,7 @@ defined, a mysql user will be created for monitoring.
 Usage
 -----
 
-The role is supposed to be used this way from a playbook ("www", "dbslaves"
+The role is supposed to be used this way from a playbook ("www", "dbreplicas"
 and "dbmaster" are some groups/hosts defined in Ansible inventory):
 
 ```yaml
@@ -126,7 +126,7 @@ and "dbmaster" are some groups/hosts defined in Ansible inventory):
   roles:
     - role: leucos.mariadb
       mariadb_filter_allow_mariadb_port: [ "www" ]
-      mariadb_slaves_group: dbslaves
+      mariadb_replicas_group: dbreplicas
       mariadb_master_host: dbmaster
       mariadb_replication_user: replicator
       mariadb_replication_password: 0mgpass
@@ -143,7 +143,7 @@ Example master host vars:
 mariadb_server_id: 1
 ```
 
-Example slave host vars:
+Example replica host vars:
 
 ```yaml
 mariadb_backup:
@@ -165,7 +165,7 @@ None
 Try this role many times and ensure it fits your needs before using it for
 production...
 
-While this role can help setting up master-slave replication or NEW servers,
+While this role can help setting up master-replica replication or NEW servers,
 it won't help you setup replication for already deployed servers.
 
 # License

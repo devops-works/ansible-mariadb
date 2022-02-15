@@ -15,7 +15,7 @@
     priv: "*.*:REPLICATION SLAVE"
     host: "{{ hostvars[item]['ansible_' + mariadb_bind_interface]['ipv4']['address'] }}"
   with_items:
-    - "{{ groups[mariadb_slaves_group] }}"
+    - "{{ groups[mariadb_replicas_group] }}"
   delegate_to: "{{ mariadb_master_host }}"
 
 - name: Displays config help

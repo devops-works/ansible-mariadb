@@ -6,8 +6,8 @@ protocol tcp dport {{ mariadb_port }} {
   saddr $ITEMS ACCEPT;
 }
 
-# Allow access to slaves
+# Allow access to replica
 protocol tcp dport {{ mariadb_port }} {
-  @def $ITEMS = ( @ipfilter( ( {{ var.slaves_list | unique | join(" ") }} ) ) );
+  @def $ITEMS = ( @ipfilter( ( {{ var.replica_list | unique | join(" ") }} ) ) );
   saddr $ITEMS ACCEPT;
 }
