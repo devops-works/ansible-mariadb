@@ -64,4 +64,4 @@ mariadb_users: []
 #     password: "bar",
 #     priv: "*.*:ALL"
 #     host: "somehost"
-mariadb_version: 5.7
+mariadb_version: 10.5
