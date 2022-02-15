@@ -50,7 +50,7 @@ open_files_limit = {{ mariadb_open_files_limit }}
 
 user		  = mysql
 socket		= /var/run/mysqld/mysqld.sock
-port		  = {{ mariadb_port }}
+port		  = {{ mariadb_port }}
 basedir		= /usr
 datadir		= {{ mariadb_data_dir }}
 tmpdir		= {{ mariadb_tmp_dir }}
@@ -68,7 +68,7 @@ bind-address    = {{ mariadb_bind_address }}
 #
 # * Fine Tuning
 #
-{% if mariadb_version is version("5.6", "<=") %}
+{% if mariadb_version is version("10.1", "<=") %}
 key_buffer         = {{ mariadb_key_buffer }}
 {% endif %}
 max_allowed_packet = "{{ mariadb_max_allowed_packet | default('16M') }}" 
@@ -76,7 +76,7 @@ thread_stack       = 192K
 thread_cache_size  = {{ mariadb_thread_cache_size }}
 # This replaces the startup script and checks MyISAM tables if needed
 # the first time they are touched
-{% if mariadb_version is version("5.6", "<=") %}
+{% if mariadb_version is version("10.1", "<=") %}
 myisam-recover         = BACKUP
 {% endif %}
 max_connections        = {{ mariadb_max_connections }}

@@ -1,5 +1,5 @@
 {% set slaves_list = [] -%}
-{% if mariadb_slaves_group %}
+{% if mariadb_slaves_group is defined %}
 {%-   for node in groups[mariadb_slaves_group] %}
   {%-   set _ = slaves_list.append(hostvars[node]['ansible_' + mariadb_bind_interface].ipv4.address) -%}
 {%   endfor -%}
