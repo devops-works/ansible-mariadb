@@ -9,7 +9,7 @@ protocol tcp dport {{ mariadb_port }} {
 {% if mariadb_replicas_group is defined and mariadb_replicas_group %}
 # Allow access to replica
 protocol tcp dport {{ mariadb_port }} {
-  @def $ITEMS = ( @ipfilter( ( {{ var.replica_list | unique | join(" ") }} ) ) );
+  @def $ITEMS = ( @ipfilter( ( {{ var.replicas_list | unique | join(" ") }} ) ) );
   saddr $ITEMS ACCEPT;
 }
 {% endif %}
