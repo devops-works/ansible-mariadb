@@ -42,6 +42,8 @@ mariadb_query_cache_strip_comments: 0
 # Cache is disabled by default
 mariadb_query_cache_type: 0
 
+mariadb_default_storage_engine: InnoDB
+
 mariadb_replication_user: false
 mariadb_replication_password: false
 mariadb_root_password: false
