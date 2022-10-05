@@ -144,7 +144,7 @@ log-bin-index = {{ mariadb_binlog_dir }}/replica-master-bin.index
 log-bin       = replica-master-bin
 log-bin-index = replica-master-bin.index
 {%     endif %}
-log-replica-updates = 1
+log-slave-updates = 1
 {%   endif %}
 
 relay-log = {{ inventory_hostname }}-replica-relay-bin
