@@ -69,3 +69,14 @@ mariadb_users: []
 #     priv: "*.*:ALL"
 #     host: "somehost"
 mariadb_version: 10.5
+
+#
+# custom mariadb configs
+# example:
+# mariadb_custom:
+#   mysqld:
+#     key_buffer_size: 16M
+#
+# those configs override every other settings made elsewhere
+#
+mariadb_custom: {}

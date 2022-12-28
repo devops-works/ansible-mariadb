@@ -67,6 +67,24 @@ All variables below are their MySQL equivalent.
 - `mariadb_tmp_dir` (default: /tmp)
 - `mariadb_tmp_table_size` (default: 16777216)
 
+#### Custom vars
+
+If you want to use variables that are not supported by the template, you can
+fill `mariadb_custom` with whatever variable is needed under it's section.
+
+For instance:
+
+```yaml
+mariadb_custom:
+  mysqld:
+    slave_skip_errors: 1062
+  mysql:
+    default-character-set: utf8mb4
+```
+
+would configure mysqld to skip error "1062" when replicating, and also set the
+default character set for mysql clients.
+
 ### Users
 
 `mariadb_users` contains a userlist like so:
