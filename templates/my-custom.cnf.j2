@@ -1,6 +1,17 @@
+########################################
+#                                      #
+# FILE UNDER ANSIBLE CONFIG MANAGEMENT #
+#                                      #
+#        keep hands away               #
+#                                      #
+########################################
+#
+# Custom configurations
+# 
 {% for cat,content in mariadb_custom.items() %}
 [{{cat}}]
 {%   for conf,val in content.items() %}
 {{ conf }} = {{ val }}
 {%   endfor %}
+
 {% endfor %}
