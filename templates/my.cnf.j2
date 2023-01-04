@@ -70,14 +70,29 @@ bind-address    = {{ mariadb_bind_address }}
 #
 {% if mariadb_version is version("10.1", "<=") %}
 key_buffer         = {{ mariadb_key_buffer }}
+{% else %}
+key_buffer_size    = {{ mariadb_key_buffer }}
 {% endif %}
 max_allowed_packet = "{{ mariadb_max_allowed_packet | default('16M') }}" 
 thread_stack       = 192K
 thread_cache_size  = {{ mariadb_thread_cache_size }}
+
 # This replaces the startup script and checks MyISAM tables if needed
-# the first time they are touched
+# the first time they are touched. Recovery can be configured as so (available
+# options my vary depending on configuration):
+#   OFF: No recovery.
+#   BACKUP: If the data file is changed while recovering, saves a backup of 
+#     the .MYD data file. t.MYD will be saved as t.MYD-datetime.BAK.
+#   BACKUP_ALL: Same as BACKUP but also backs up the .MYI index file. t.MYI 
+#     will be saved as t.MYI-datetime.BAK.
+#   DEFAULT: Recovers without backing up, forcing, or quick checking.
+#   FORCE: Runs the recovery even if it determines that more than one row from
+#     the data file will be lost.
+#   QUICK: Does not check rows in the table if there are no delete blocks.
 {% if mariadb_version is version("10.1", "<=") %}
 myisam-recover         = BACKUP
+{% else %}
+myisam_recover_options = BACKUP
 {% endif %}
 max_connections        = {{ mariadb_max_connections }}
 
@@ -94,7 +109,6 @@ collation-server      = {{ mariadb_collation_server }}
 {% endif %}
 
 default-storage-engine={{ mariadb_default_storage_engine }}
-
 
 #table_cache            = 64
 #thread_concurrency     = 10

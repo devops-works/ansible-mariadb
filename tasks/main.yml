@@ -1,34 +1,53 @@
 ---
-- import_tasks: check_vars.yml
+- include_tasks:
+    file: check_vars.yml
+    apply:
+      tags:
+        - mariadb
+        - check
   tags:
-    - mariadb
-    - check
+    - always
 
-- import_tasks: mariadb.yml
+- include_tasks:
+    file: mariadb.yml
+    apply:
+      tags:
+        - mariadb
+        - mariadb:install
   tags:
-    - mariadb
-    - mariadb:install
-
+    - always
 # mysql_replication won't help you with replication
 # it is ok on a NEW server, but fails miserably on a running server
 # don't expect it to handle a proper binlog or logpos
 # so in the replica.yml tasks, all calls to mysql_replication have been removed
-- import_tasks: replica.yml
+- include_tasks:
+    file: replica.yml
+    apply:
+      tags:
+        - mariadb
+        - mariadb:client
+        - mariadb:replicas
   when: mariadb_master_host is defined and mariadb_master_host and mariadb_replicas_group in group_names
   tags:
-    - mariadb
-    - mariadb:client
-    - mariadb:replicas
+    - always
 
-- import_tasks: backup.yml
+- include_tasks:
+    file: backup.yml
+    apply:
+      tags:
+        - mariadb
+        - backup
+        - mariadb:backup
   when: mariadb_backup
   tags:
-    - mariadb
-    - backup
-    - mariadb:backup
+    - always
 
-- import_tasks: monitoring.yml
+- include_tasks:
+    file: monitoring.yml
+    apply:
+      tags:
+        - mariadb
+        - monitoring
   when: mariadb_monitoring_user is defined and mariadb_monitoring_user
   tags:
-    - mariadb
-    - monitoring
+    - always

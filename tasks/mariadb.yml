@@ -25,6 +25,18 @@
   tags:
     - mariadb:config
 
+- name: Adds mysql custom configs
+  template:
+    src: my-custom.cnf.j2
+    dest: /etc/mysql/mariadb.conf.d/99-custom.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart mariadb
+  tags:
+    - mariadb:config
+    - mariadb:custom
+
 - name: Creates data directory
   file:
     state: directory
