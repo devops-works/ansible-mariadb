@@ -9,7 +9,7 @@
    name: ferm
    state: restarted
 
-- name: Reload nftables service
+- name: Reload nftables
   systemd:
     name: nftables
     state: restarted
