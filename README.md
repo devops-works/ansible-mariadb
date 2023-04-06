@@ -50,7 +50,8 @@ All variables below are their MySQL equivalent.
 - `mariadb_bind_address` (default: "127.0.0.1")
 - `mariadb_character_set_server` (default: none)
 - `mariadb_collation_server` (default: none)
-- `mariadb_key_buffer` (default: "16M")
+- `mariadb_key_buffer` (default: "16M"; if set to "auto", will be set to 20% of
+  total RAM)
 - `mariadb_master_host` (default: undefined)
 - `mariadb_max_binlog_size` (default: 100M)
 - `mariadb_max_connections` (default: 151)
