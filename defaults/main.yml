@@ -24,6 +24,8 @@ mariadb_data_dir: /var/lib/mysql
 mariadb_binlog_dir: /var/lib/mysql
 mariadb_expire_logs_days: 1
 mariadb_ferm_enabled: ferm_enabled | default(false)
+mariadb_nftables_enabled: nftables_enabled | default(false)
+
 mariadb_filter_allow_mariadb_port: []
 mariadb_key_buffer: "16M"
 mariadb_max_binlog_size: 100M

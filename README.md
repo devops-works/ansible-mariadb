@@ -115,7 +115,8 @@ inventory group (default: false).
 ### Firewalling
 
 If you want to deploy ferm rules, `mariadb_ferm_enabled` should be set to true
-(default: ferm_enabled | default(false)). Variable
+(default: ferm_enabled | default(false)). If you want to deploy nftables rules for the [ansible-nftables](https://github.com/devops-works/ansible-nftables) role, `mariadb_nftables_enabled` should be set to true
+(default: false). Variable
 `mariadb_filter_allow_mariadb_port` is a list that accepts inventory host
 names, group names or ip ranges. By default, it is empty (`[]`) which means mysql
 port will be filtered to all hosts.

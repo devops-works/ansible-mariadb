@@ -1,0 +1,14 @@
+{% import 'variables.inc' as var with context %}
+
+table ip filter {
+    chain INPUT {
+{% if var.mysql_allow | length > 0 %}
+      # Allow access to clients
+      tcp dport { {{ mariadb_port }} } ip saddr { {{ var.mysql_allow | unique | join(", ") }} } counter accept comment "allowed mysql clients"
+{% endif %}
+{% if mariadb_replicas_group is defined and mariadb_replicas_group %}
+      # Allow access to replica
+      tcp dport { {{ mariadb_port }} } ip saddr { {{ var.replicas_list | unique | join(", ") }} } counter accept comment "allowed mysql replicas"
+{% endif %}
+    }
+}

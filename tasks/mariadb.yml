@@ -178,3 +178,14 @@
   when: mariadb_ferm_enabled
   tags: ferm
   notify: Restart ferm
+
+- name: Adds nftables filtering
+  template:
+    src: nftables.j2
+    dest: /etc/nftables.d/pre/60_mysql.conf
+    mode: 0644
+    owner: root
+    group: root
+  when: mariadb_nftables_enabled
+  tags: nftables
+  notify: Reload nftables
