@@ -6,7 +6,7 @@ table ip filter {
       # Allow access to clients
       tcp dport { {{ mariadb_port }} } ip saddr { {{ var.mysql_allow | unique | join(", ") }} } counter accept comment "allowed mysql clients"
 {% endif %}
-{% if mariadb_replicas_group is defined and mariadb_replicas_group %}
+{% if mariadb_replicas_group is defined and mariadb_replicas_group and inventory_hostname not in groups[mariadb_replicas_group]%}
       # Allow access to replica
       tcp dport { {{ mariadb_port }} } ip saddr { {{ var.replicas_list | unique | join(", ") }} } counter accept comment "allowed mysql replicas"
 {% endif %}
