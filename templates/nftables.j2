@@ -1,4 +1,5 @@
 {% import 'variables.inc' as var with context %}
+{% if var.mysql_allow | length > 0 or (mariadb_replicas_group is defined and mariadb_replicas_group and inventory_hostname not in groups[mariadb_replicas_group]) %}
 
 table ip filter {
     chain INPUT {
@@ -12,3 +13,5 @@ table ip filter {
 {% endif %}
     }
 }
+
+{% endif %}
