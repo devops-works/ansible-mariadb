@@ -15,6 +15,7 @@ mariadb_backup_gcloudbucket: ""
 mariadb_backup_destination: /var/backups/mysql/
 mariadb_backup_cron_time: "15 */2 * * 0-7"
 mariadb_backup_additional_flag: "" # e.g. --dump-slave=2 or --master-data=2
+mariadb_backup_exclude: "###########"
 
 mariadb_bind_address: "127.0.0.1"
 # if defined, mariadb_bind_interface takes precedence over mariadb_bind_address

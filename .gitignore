@@ -3,3 +3,4 @@
 molecule*
 Vagrantfile
 /tests/*
+.vscode/
