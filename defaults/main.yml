@@ -85,3 +85,6 @@ mariadb_version: 10.5
 # those configs override every other settings made elsewhere
 #
 mariadb_custom: {}
+
+# skip restart in handler
+mariadb_skip_restart: false

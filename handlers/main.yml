@@ -3,6 +3,7 @@
   service:
    name: mysql
    state: restarted
+  when: mariadb_skip_restart is not defined or not mariadb_skip_restart
 
 - name: Restart ferm
   service:
