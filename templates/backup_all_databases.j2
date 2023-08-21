@@ -20,6 +20,8 @@ DB=$(echo "SHOW DATABASES;" | mysql --password="${PASS}" | tail -n +2 | grep -v 
 
 errors=0
 
+set -o pipefail
+
 for j in ${DB}; do
   [[ $1 == '-v' ]] && echo -n "Database ${j}...backup..." 
   DATE=$(date +%Y%m%d_%H%M%S)
