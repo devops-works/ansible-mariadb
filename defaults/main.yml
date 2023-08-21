@@ -31,6 +31,7 @@ mariadb_filter_allow_mariadb_port: []
 mariadb_key_buffer: "16M"
 mariadb_max_binlog_size: 100M
 mariadb_max_connections: 151
+mariadb_max_allowed_packet: 16M
 mariadb_monitoring_user: false
 mariadb_monitoring_password: false
 # Max in-memory table size (see also mariadb_tmp_table_size)

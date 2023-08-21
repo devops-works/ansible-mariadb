@@ -83,7 +83,7 @@ key_buffer_size		= {{ mariadb_key_buffer }}
 {%   endif %}
 {% endif %}
 
-max_allowed_packet = "{{ mariadb_max_allowed_packet | default('16M') }}" 
+max_allowed_packet = "{{ mariadb_max_allowed_packet }}"
 thread_stack       = 192K
 thread_cache_size  = {{ mariadb_thread_cache_size }}
 
