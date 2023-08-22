@@ -77,9 +77,9 @@ key_buffer		= {{ mariadb_key_buffer }}
 {%   endif %}{% else %}
 {%   if mariadb_key_buffer == "auto" %}
 # key_buffer_size has been automatically set to 20% of total RAM
-key_buffer_size		= {{ (ansible_memtotal_mb * 1024 * 1024 * 0.2) | int}}
+key_buffer_size	   = {{ (ansible_memtotal_mb * 1024 * 1024 * 0.2) | int}}
 {%   else %}
-key_buffer_size		= {{ mariadb_key_buffer }}
+key_buffer_size	   = {{ mariadb_key_buffer }}
 {%   endif %}
 {% endif %}
 
