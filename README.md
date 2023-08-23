@@ -86,6 +86,17 @@ mariadb_custom:
 would configure mysqld to skip error "1062" when replicating, and also set the
 default character set for mysql clients.
 
+### Skip daemon restart
+
+In some situations, you might want to deploy a configuration change without
+restarting the server to avoid disruptions. For instance, you change the
+variable manually using `SET GLOBAL` and just want to align the configuration
+without restarting.
+
+In this case, you can execute the playbook with the variable
+`mariadb_skip_restart` set to `true`. This way, the restart handler will be
+skipped.
+
 ### Users
 
 `mariadb_users` contains a userlist like so:
