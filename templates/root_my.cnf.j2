@@ -10,7 +10,10 @@
 [client]
 user     = root
 password = "{{ mariadb_root_password }}"
+
+[mysqldump]
 max_allowed_packet = {{ mariadb_max_allowed_packet }}
 
 [mysql]
+max_allowed_packet = {{ mariadb_max_allowed_packet }}
 no-auto-rehash
