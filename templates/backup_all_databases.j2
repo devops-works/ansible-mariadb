@@ -31,6 +31,16 @@ for j in ${DB}; do
     cat /tmp/error
     echo
     errors=$((errors + 1))
+    continue
+  fi
+
+  # Check that backup is complete
+  zstdcat "${DEST}/$j-${DATE}.sql.zst" | tail -1 | grep -qm1 -- '^-- Dump completed' 
+  if [ $? != 0 ]; then
+    echo "Backup integrity error: final line not found"
+    echo
+    errors=$((errors + 1))
+    continue
   fi
 
   # Encrypt backups
