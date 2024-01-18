@@ -89,3 +89,5 @@ mariadb_custom: {}
 
 # skip restart in handler
 mariadb_skip_restart: false
+
+mariadb_influx_tags: ""
