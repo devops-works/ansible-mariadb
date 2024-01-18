@@ -18,8 +18,6 @@
 
 - name: Import public gpg keys
   shell: "curl -s {{ item.url }} | gpg --import --trust-model always -"
-  args:
-    warn: no
   changed_when: '"imported" in __mariadb_gpgkeys.stderr'
   register: __mariadb_gpgkeys
   loop: "{{ mariadb_backup_gpg_keys }}"
