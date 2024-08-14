@@ -10,5 +10,5 @@ INFLUX_PASS="{{ telegraf_output_influxdb.password }}"
 {# Requires influxevent > v0.14.5 #}
 {{ mariadb_backup_cron_time }} root /usr/local/bin/influxevent -timeout 7200 -period 1000 -lock_file /tmp/dbbackup.lock -- /usr/local/bin/database_backup > /var/log/dbbackup.log 2>&1
 {% else %}
-{{ mariadb_backup_cron_time }} root /usr/local/bin/database_backup -timeout 7200 -period 1000 > /var/log/dbbackup.log 2>&1
+{{ mariadb_backup_cron_time }} root /usr/local/bin/database_backup -timeout 7200 -period 1000 -lock_file /tmp/dbbackup.lock > /var/log/dbbackup.log 2>&1
 {% endif %}
