@@ -62,7 +62,7 @@ for j in ${DB}; do
     mv "${DEST}/$j-${DATE}.sql.zst.gpg" ${DEST_ENCRYPTED}/ || errors=$((errors + 1))
     # Remove old encrypted backups
     # COUNT=$(( $(ls ${DEST_ENCRYPTED}/${j}-*.zst.gpg | wc -l) - ${KEEP} ))
-    COUNT=$(( $(ls $DEST_ENCRYPTED/$j-*.gpg) | wc -l` - $KEEP ))
+    COUNT=$(( $(ls $DEST_ENCRYPTED/$j-*.gpg | wc -l) - $KEEP ))
     if [ ${COUNT} -gt 0 ]; then
       [[ $1 == '-v' ]] && log "purging ${COUNT} encrypted backups"
       for i in ${ls $DEST_ENCRYPTED/$j-*.gpg | head -$COUNT}; do
