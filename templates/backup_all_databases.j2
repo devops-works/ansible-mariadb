@@ -35,7 +35,7 @@ errors=0
 set -o pipefail
 
 for j in ${DB}; do
-  [[ $1 == '-v' ]] && echo -n "Database ${j}...backup..." 
+  [[ $1 == '-v' ]] && log "database ${j} backup" 
   DATE=$(date +%Y%m%d_%H%M%S)
   mysqldump --password="${PASS}" --routines --triggers --single-transaction {{ mariadb_backup_additional_flag }} --max-allowed-packet={{ mariadb_max_allowed_packet}} "${j}" 2> $ERRFILE | tee >(zstd > "${DEST}/$j-${DATE}.sql.zst") | tail -1 > $GREPFILE
   if [ $? != 0 ]; then
@@ -57,7 +57,7 @@ for j in ${DB}; do
   # Encrypt backups
   if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
     # Encrypt
-    [[ $1 == '-v' ]] && echo -n "encrypting..." 
+    [[ $1 == '-v' ]] && log "encrypting ${DEST}/$j-${DATE}.sql.zst"
     gpg --encrypt ${GPG_RCPT} --compress-algo none --trust-model always "${DEST}/$j-${DATE}.sql.zst" || errors=$((errors + 1)) 
     mv "${DEST}/$j-${DATE}.sql.zst.gpg" ${DEST_ENCRYPTED}/ || errors=$((errors + 1))
     # Remove old encrypted backups
@@ -65,7 +65,7 @@ for j in ${DB}; do
     COUNT=$(( $(ls $DEST_ENCRYPTED/$j-*.gpg | wc -l) - $KEEP ))
     if [ ${COUNT} -gt 0 ]; then
       [[ $1 == '-v' ]] && log "purging ${COUNT} encrypted backups"
-      for i in ${ls $DEST_ENCRYPTED/$j-*.gpg | head -$COUNT}; do
+      for i in $(ls $DEST_ENCRYPTED/$j-*.gpg | head -$COUNT); do
         rm $i
       done
     fi
@@ -75,7 +75,7 @@ for j in ${DB}; do
   # remove older backups for mysqldump
   COUNT=$(( $(ls $DEST/$j-*.zst | wc -l) - $KEEP ))
   if [ ${COUNT} -gt 0 ]; then
-    [[ $1 == '-v' ]] && echo -n "purging ${COUNT} clear backups"
+    [[ $1 == '-v' ]] && log "purging ${COUNT} clear backups"
     for i in $(ls $DEST/$j-*.zst | head -$COUNT); do
       rm $i
     done
@@ -90,7 +90,7 @@ if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
 fi
 
 if [ -n "{{ mariadb_backup_s3bucket }}" ]; then
-  [[ $1 == '-v' ]] && echo -n "syncing to s3://{{ mariadb_backup_s3bucket }}..."
+  [[ $1 == '-v' ]] && log "syncing to s3://{{ mariadb_backup_s3bucket }}"
   s3cmd sync ${SOURCE} s3://{{ mariadb_backup_s3bucket }}/
   if [ $? -gt 0 ]; then
     log "error syncing ${SOURCE} to s3://{{ mariadb_backup_s3bucket }}/"
@@ -100,7 +100,7 @@ if [ -n "{{ mariadb_backup_s3bucket }}" ]; then
 fi
 
 if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
-  [[ $1 == '-v' ]] && echo -n "syncing to gs://{{ mariadb_backup_gcloudbucket }}..."
+  [[ $1 == '-v' ]] && log "syncing to gs://{{ mariadb_backup_gcloudbucket }}"
   gsutil -m rsync -r ${SOURCE} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
   if [ $? -gt 0 ]; then
     log "error syncing ${SOURCE} to gs://{{ mariadb_backup_gcloudbucket }}"
