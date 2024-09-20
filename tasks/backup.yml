@@ -46,3 +46,13 @@
     mode: 0600
   tags:
     - cron
+
+- name: Add logrotate entry
+  ansible.builtin.template:
+    src: logrotate_backup.j2
+    dest: /etc/logrotate.d/database_backup
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - logrotate
