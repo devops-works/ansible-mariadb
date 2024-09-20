@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-#
-# {{ ansible_managed }}
-#
-
 # How many backups to keep
 KEEP={{ mariadb_backup_keep }}
 
@@ -18,6 +14,22 @@ GPG_RCPT="{% for entry in mariadb_backup_gpg_keys %}--recipient {{ entry.id }} {
 
 DB=$(echo "SHOW DATABASES;" | mysql --password="${PASS}" | tail -n +2 | grep -v '^information_schema$' | grep -v '^performance_schema$' | grep -v '^sys$' | grep -v "${EXCLUDE}")
 
+# ---
+
+ERRFILE=$(mktemp)
+GREPFILE=$(mktemp)
+
+function log {
+  echo "$(date +'%Y-%m-%dT%H:%M:%SZ') : $1"
+}
+
+function clean_up {
+  log "cleaning up"
+  rm ${ERRFILE} ${GREPFILE}
+}
+
+trap clean_up EXIT
+
 errors=0
 
 set -o pipefail
@@ -25,19 +37,18 @@ set -o pipefail
 for j in ${DB}; do
   [[ $1 == '-v' ]] && echo -n "Database ${j}...backup..." 
   DATE=$(date +%Y%m%d_%H%M%S)
-  mysqldump --password="${PASS}" --routines --triggers --single-transaction {{ mariadb_backup_additional_flag }} --max-allowed-packet={{ mariadb_max_allowed_packet}} "${j}" 2> /tmp/error | zstd > "${DEST}/$j-${DATE}.sql.zst"
+  mysqldump --password="${PASS}" --routines --triggers --single-transaction {{ mariadb_backup_additional_flag }} --max-allowed-packet={{ mariadb_max_allowed_packet}} "${j}" 2> $ERRFILE | tee >(zstd > "${DEST}/$j-${DATE}.sql.zst") | tail -1 > $GREPFILE
   if [ $? != 0 ]; then
-    echo "Error backuping (mysqldump) ${j} :"
-    cat /tmp/error
+    log "error backuping (mysqldump) ${j} :"
+    cat ${ERRFILE}
     echo
     errors=$((errors + 1))
     continue
   fi
 
   # Check that backup is complete
-  zstdcat "${DEST}/$j-${DATE}.sql.zst" | tail -1 | grep -qm1 -- '^-- Dump completed' 
-  if [ $? != 0 ]; then
-    echo "Backup integrity error: final line not found"
+  if ! grep -m1 "^-- Dump completed" $GREPFILE > /dev/null 2>&1; then
+    log "backup integrity error: final line not found"
     echo
     errors=$((errors + 1))
     continue
@@ -47,30 +58,29 @@ for j in ${DB}; do
   if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
     # Encrypt
     [[ $1 == '-v' ]] && echo -n "encrypting..." 
-    gpg --encrypt ${GPG_RCPT} --trust-model always "${DEST}/$j-${DATE}.sql.zst" || errors=$((errors + 1)) 
-    mv "${DEST}/$j-${DATE}.sql.zst.gpg" ${DEST_ENCRYPTED}/ || errors=$((errors + 1)) 
+    gpg --encrypt ${GPG_RCPT} --compress-algo none --trust-model always "${DEST}/$j-${DATE}.sql.zst" || errors=$((errors + 1)) 
+    mv "${DEST}/$j-${DATE}.sql.zst.gpg" ${DEST_ENCRYPTED}/ || errors=$((errors + 1))
     # Remove old encrypted backups
     # COUNT=$(( $(ls ${DEST_ENCRYPTED}/${j}-*.zst.gpg | wc -l) - ${KEEP} ))
-    COUNT=$(( `ls $DEST_ENCRYPTED/$j-*.gpg | wc -l` - $KEEP ))
+    COUNT=$(( $(ls $DEST_ENCRYPTED/$j-*.gpg) | wc -l` - $KEEP ))
     if [ ${COUNT} -gt 0 ]; then
-      [[ $1 == '-v' ]] && echo -n "purging ${COUNT} encrypted..."
-      for i in `ls $DEST_ENCRYPTED/$j-*.gpg | head -$COUNT`; do
+      [[ $1 == '-v' ]] && log "purging ${COUNT} encrypted backups"
+      for i in ${ls $DEST_ENCRYPTED/$j-*.gpg | head -$COUNT}; do
         rm $i
       done
     fi
+    [[ $1 == '-v' ]] && log "purge encrypted backups done"
   fi
 
   # remove older backups for mysqldump
-  # COUNT=$(( $(ls ${DEST}/${j}-*.zst | wc -l) - ${KEEP} ))
-  COUNT=$(( `ls $DEST/$j-*.zst | wc -l` - $KEEP ))
+  COUNT=$(( $(ls $DEST/$j-*.zst | wc -l) - $KEEP ))
   if [ ${COUNT} -gt 0 ]; then
-      [[ $1 == '-v' ]] && echo -n "purging ${COUNT} clear..."
-    for i in `ls $DEST/$j-*.zst | head -$COUNT`; do
+    [[ $1 == '-v' ]] && echo -n "purging ${COUNT} clear backups"
+    for i in $(ls $DEST/$j-*.zst | head -$COUNT); do
       rm $i
     done
   fi
-
-  [[ $1 == '-v' ]] && echo "done"
+  [[ $1 == '-v' ]] && log "purge clear backups done"
 done
 
 SOURCE="${DEST}"
@@ -83,24 +93,24 @@ if [ -n "{{ mariadb_backup_s3bucket }}" ]; then
   [[ $1 == '-v' ]] && echo -n "syncing to s3://{{ mariadb_backup_s3bucket }}..."
   s3cmd sync ${SOURCE} s3://{{ mariadb_backup_s3bucket }}/
   if [ $? -gt 0 ]; then
-    echo -n "error syncing ${SOURCE} to s3://{{ mariadb_backup_s3bucket }}/"
+    log "error syncing ${SOURCE} to s3://{{ mariadb_backup_s3bucket }}/"
     exit 1
   fi
-  [[ $1 == '-v' ]] && echo "done"
+  [[ $1 == '-v' ]] && log "S3 sync done"
 fi
 
 if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
   [[ $1 == '-v' ]] && echo -n "syncing to gs://{{ mariadb_backup_gcloudbucket }}..."
   gsutil -m rsync -r ${SOURCE} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
   if [ $? -gt 0 ]; then
-    echo -n "error syncing ${SOURCE} to gs://{{ mariadb_backup_gcloudbucket }}"
+    log "error syncing ${SOURCE} to gs://{{ mariadb_backup_gcloudbucket }}"
     exit 1
   fi
-  [[ $1 == '-v' ]] && echo "done"
+  [[ $1 == '-v' ]] && log "GCS sync done"
 fi
 
 if [ $errors -gt 0 ]; then
-  echo "$errors errors occured"
+  log "$errors errors occured"
   exit 1
 fi
 
