@@ -36,7 +36,7 @@ set -o pipefail
 
 for j in ${DB}; do
   [[ $1 == '-v' ]] && log "database ${j} backup" 
-  DATE=$(date +%Y%m%d_%H%M%S)
+  DATE=$(date -u +%Y%m%d_%H%M%S)
   mysqldump --password="${PASS}" --routines --triggers --single-transaction {{ mariadb_backup_additional_flag }} --max-allowed-packet={{ mariadb_max_allowed_packet}} "${j}" 2> $ERRFILE | tee >(zstd > "${DEST}/$j-${DATE}.sql.zst") | tail -1 > $GREPFILE
   if [ $? != 0 ]; then
     log "error backuping (mysqldump) ${j} :"
