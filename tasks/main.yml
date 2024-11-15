@@ -1,5 +1,6 @@
 ---
-- include_tasks:
+- name: Vars check
+  ansible.builtin.include_tasks:
     file: check_vars.yml
     apply:
       tags:
@@ -8,7 +9,8 @@
   tags:
     - always
 
-- include_tasks:
+- name: MariaDB tasks
+  ansible.builtin.include_tasks:
     file: mariadb.yml
     apply:
       tags:
@@ -20,7 +22,8 @@
 # it is ok on a NEW server, but fails miserably on a running server
 # don't expect it to handle a proper binlog or logpos
 # so in the replica.yml tasks, all calls to mysql_replication have been removed
-- include_tasks:
+- name: Replica tasks
+  ansible.builtin.include_tasks:
     file: replica.yml
     apply:
       tags:
@@ -31,7 +34,8 @@
   tags:
     - always
 
-- include_tasks:
+- name: Backup tasks
+  ansible.builtin.include_tasks:
     file: backup.yml
     apply:
       tags:
@@ -42,7 +46,8 @@
   tags:
     - always
 
-- include_tasks:
+- name: Monitoring tasks
+  ansible.builtin.include_tasks:
     file: monitoring.yml
     apply:
       tags:

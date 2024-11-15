@@ -4,46 +4,47 @@
 #
 #
 - name: Installs backup script
-  template:
+  ansible.builtin.template:
     src: backup_all_databases.j2
     dest: /usr/local/bin/database_backup
-    mode: 0700
+    mode: "0700"
     owner: root
     group: root
 
 - name: Ensure gpg is installed
-  apt:
+  ansible.builtin.apt:
     pkg: gpg
     state: present
 
-- name: Import public gpg keys
-  shell: "curl -s {{ item.url }} | gpg --import --trust-model always -"
+- name: Import public gpg keys  # noqa risky-shell-pipe command-instead-of-module
+  ansible.builtin.shell:
+    cmd: "curl -s {{ item.url }} | gpg --import --trust-model always -"
   changed_when: '"imported" in __mariadb_gpgkeys.stderr'
   register: __mariadb_gpgkeys
   loop: "{{ mariadb_backup_gpg_keys }}"
   tags: keys
 
 - name: Ensures backup destination exists
-  file:
+  ansible.builtin.file:
     path: "{{ mariadb_backup_destination }}"
     state: directory
-    mode: 0700
+    mode: "0700"
     owner: root
 
 - name: Ensures encrypted backup destination exists
-  file:
+  ansible.builtin.file:
     path: "{{ mariadb_backup_destination }}/gpg"
     state: directory
-    mode: 0700
+    mode: "0700"
     owner: root
 
 - name: Add cron entry
-  template:
+  ansible.builtin.template:
     src: cron.j2
     dest: /etc/cron.d/database_backup
     owner: root
     group: root
-    mode: 0600
+    mode: "0600"
   tags:
     - cron
 
@@ -53,6 +54,6 @@
     dest: /etc/logrotate.d/database_backup
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   tags:
     - logrotate

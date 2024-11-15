@@ -1,16 +1,16 @@
 ---
 - name: Restart mariadb
-  service:
-   name: mysql
-   state: restarted
+  ansible.builtin.service:
+    name: mysql
+    state: restarted
   when: mariadb_skip_restart is not defined or not mariadb_skip_restart
 
 - name: Restart ferm
-  service:
-   name: ferm
-   state: restarted
+  ansible.builtin.service:
+    name: ferm
+    state: restarted
 
 - name: Reload nftables
-  systemd:
+  ansible.builtin.systemd:
     name: nftables
     state: restarted

@@ -5,102 +5,103 @@
 #
 
 - name: Installs mariadb-server
-  apt:
+  ansible.builtin.apt:
     pkg: "mariadb-server-{{ mariadb_version }}"
     state: present
 
 - name: Installs additional tools
-  apt:
+  ansible.builtin.apt:
     pkg: "{{ mariadb_additional_tools }}"
     state: present
 
 - name: Adds mysql config
-  template:
+  ansible.builtin.template:
     src: my.cnf.j2
     dest: /etc/mysql/mariadb.conf.d/99-ansible.cnf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart mariadb
   tags:
     - mariadb:config
 
 - name: Adds mysql custom configs
-  template:
+  ansible.builtin.template:
     src: my-custom.cnf.j2
     dest: /etc/mysql/mariadb.conf.d/99-custom.cnf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify: Restart mariadb
   tags:
     - mariadb:config
     - mariadb:custom
 
 - name: Creates data directory
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ mariadb_data_dir }}"
     owner: mysql
     group: mysql
-    mode: 0755
+    mode: "0755"
   notify: Restart mariadb
   register: __new_datadir
   tags:
     - mariadb:config
 
 - name: Creates binlog directory
-  file:
+  ansible.builtin.file:
     state: directory
     path: "{{ mariadb_binlog_dir }}"
     owner: mysql
     group: mysql
-    mode: 0755
+    mode: "0755"
   notify: Restart mariadb
   tags:
     - mariadb:config
 
-- name: Stop mysql if datadir is new
-  service:
+- name: Stop mysql if datadir is new  # noqa no-handler
+  ansible.builtin.service:
     name: mariadb
     state: stopped
   when: __new_datadir is changed
 
-- name: Initialize datadir if new
-  command: >
-    /usr/bin/mysql_install_db --datadir={{ mariadb_data_dir }} 
+- name: Initialize datadir if new  # noqa no-handler
+  ansible.builtin.command: >
+    /usr/bin/mysql_install_db --datadir={{ mariadb_data_dir }}
     --auth-root-authentication-method=socket
     --rpm --cross-bootstrap --user=mysql
     --disable-log-bin  --skip-test-db
+  changed_when: false
   when: __new_datadir is changed
 
 - name: Restart mariadb if necessary
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Adds Python2 MySQL support
-  apt:
+  ansible.builtin.apt:
     pkg: "python-mysqldb"
     state: present
   when: ansible_facts.python.version.major == 2
 
 - name: Adds Python3 MySQL support
-  apt:
+  ansible.builtin.apt:
     pkg: "python3-mysqldb"
     state: present
   when: ansible_facts.python.version.major == 3
 
 # # In this case, mysql_user will fail connecting to mysql
 - name: Sets the root password (first attempt / failure is ok)
-  mysql_user:
+  community.mysql.mysql_user:
     user: root
     password: "{{ mariadb_root_password }}"
     host: localhost
 
 - name: Configures for easy access as root user
-  template:
+  ansible.builtin.template:
     src: root_my.cnf.j2
     dest: /root/.my.cnf
-    mode: 0600
+    mode: "0600"
 
 # - name: Sets the root password (second attempt)
 #   mysql_user:
@@ -110,18 +111,18 @@
 #   ignore_errors: yes
 
 - name: Deletes anonymous MySQL server user for ansible_fqdn
-  mysql_user:
+  community.mysql.mysql_user:
     user: ""
     host: "{{ ansible_fqdn }}"
     state: "absent"
 
 - name: Deletes anonymous MySQL server user for localhost
-  mysql_user:
+  community.mysql.mysql_user:
     user: ""
     state: "absent"
 
 - name: Adds required MySQL users
-  mysql_user:
+  community.mysql.mysql_user:
     name: "{{ item.name }}"
     password: "{{ item.password }}"
     priv: "{{ item.privs }}"
@@ -129,7 +130,7 @@
   when: mariadb_users is defined
 
 - name: Adds required MySQL users with hosts
-  mysql_user:
+  community.mysql.mysql_user:
     name: "{{ item.name }}"
     password: "{{ item.password }}"
     priv: "{{ item.privs }}"
@@ -138,41 +139,41 @@
   when: item.host is defined and mariadb_users is defined
 
 - name: Secures the MySQL root user for IPV6 localhost (::1)
-  mysql_user:
+  community.mysql.mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "::1"
 
 - name: Secures the MySQL root user for IPV4 localhost (127.0.0.1)
-  mysql_user:
+  community.mysql.mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "127.0.0.1"
 
 - name: Secures the MySQL root user for localhost domain (localhost)
-  mysql_user:
+  community.mysql.mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "localhost"
 
 - name: Secures the MySQL root user for server_hostname domain
-  mysql_user:
+  community.mysql.mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "{{ ansible_fqdn }}"
   failed_when: false
 
 - name: Removes the MySQL test database
-  mysql_db:
+  community.mysql.mysql_db:
     db: test
     state: absent
   notify: Restart mariadb
 
 - name: Adds ferm filtering
-  template:
+  ansible.builtin.template:
     src: ferm.j2
     dest: /etc/ferm/filter-input.d/60_mysql.conf
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
   when: mariadb_ferm_enabled
@@ -180,10 +181,10 @@
   notify: Restart ferm
 
 - name: Adds nftables filtering
-  template:
+  ansible.builtin.template:
     src: nftables.j2
     dest: /etc/nftables.d/pre/60_mysql.conf
-    mode: 0644
+    mode: "0644"
     owner: root
     group: root
   when: mariadb_nftables_enabled

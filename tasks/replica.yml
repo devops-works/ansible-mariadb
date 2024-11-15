@@ -3,11 +3,11 @@
 # We assume that, if a master slace setup is user, we bind to a specific interface
 
 - name: Sets mariadb master IP
-  set_fact:
+  ansible.builtin.set_fact:
     __mariadb_master_ip: "{{ hostvars[mariadb_master_host]['ansible_' + mariadb_bind_interface]['ipv4']['address'] }}"
 
 - name: Adds required replication users
-  mysql_user:
+  community.mysql.mysql_user:
     login_user: root
     login_password: "{{ mariadb_root_password }}"
     name: "{{ mariadb_replication_user }}"
@@ -19,5 +19,5 @@
   delegate_to: "{{ mariadb_master_host }}"
 
 - name: Displays config help
-  debug:
+  ansible.builtin.debug:
     msg: CHANGE MASTER TO MASTER_USER='{{ mariadb_replication_user }}', MASTER_PASSWORD='{{ mariadb_replication_password }}', MASTER_LOG_FILE='CHANGEME', MASTER_LOG_POS=CHANGEME, MASTER_HOST='{{ __mariadb_master_ip }}';

@@ -1,12 +1,14 @@
 ---
 - name: Checking that required variables are set
-  fail: msg="{{ item }} is not defined"
+  ansible.builtin.fail:
+    msg: "{{ item }} is not defined"
   when: not item
   with_items:
     - mariadb_root_password
 
 - name: Checking that required variables are set if master/replica setup
-  fail: msg="mariadb_replicas_group, perconna_replication_user and perconna_replication_password must be defined if mariadb_master_host is"
+  ansible.builtin.fail:
+    msg: "mariadb_replicas_group, perconna_replication_user and perconna_replication_password must be defined if mariadb_master_host is"
   when: mariadb_master_host is defined and not item
   with_items:
     - mariadb_bind_interface
