@@ -86,7 +86,7 @@
 
 - name: Adds Python3 MySQL support
   ansible.builtin.apt:
-    pkg: "python3-mysqldb"
+    pkg: "python3-pymysql"
     state: present
   when: ansible_facts.python.version.major == 3
 
