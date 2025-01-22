@@ -14,6 +14,7 @@
     password: "{{ mariadb_replication_password }}"
     priv: "*.*:REPLICATION SLAVE"
     host: "{{ hostvars[item]['ansible_' + mariadb_bind_interface]['ipv4']['address'] }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   with_items:
     - "{{ groups[mariadb_replicas_group] }}"
   delegate_to: "{{ mariadb_master_host }}"

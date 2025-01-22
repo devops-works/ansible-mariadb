@@ -6,6 +6,7 @@
     priv: '*.*:PROCESS/*.*:REPLICATION CLIENT/*.*:SELECT'
     host: "{{ item }}"
     state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   with_items:
     - localhost
     - 127.0.0.1

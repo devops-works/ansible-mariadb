@@ -96,6 +96,7 @@
     user: root
     password: "{{ mariadb_root_password }}"
     host: localhost
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Configures for easy access as root user
   ansible.builtin.template:
@@ -115,17 +116,20 @@
     user: ""
     host: "{{ ansible_fqdn }}"
     state: "absent"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Deletes anonymous MySQL server user for localhost
   community.mysql.mysql_user:
     user: ""
     state: "absent"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Adds required MySQL users
   community.mysql.mysql_user:
     name: "{{ item.name }}"
     password: "{{ item.password }}"
     priv: "{{ item.privs }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   with_items: [ "{{ mariadb_users }}" ]
   when: mariadb_users is defined
 
@@ -135,6 +139,7 @@
     password: "{{ item.password }}"
     priv: "{{ item.privs }}"
     host: "{{ item.host }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   with_items: [ "{{ mariadb_users }}" ]
   when: item.host is defined and mariadb_users is defined
 
@@ -143,30 +148,35 @@
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "::1"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Secures the MySQL root user for IPV4 localhost (127.0.0.1)
   community.mysql.mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "127.0.0.1"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Secures the MySQL root user for localhost domain (localhost)
   community.mysql.mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "localhost"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Secures the MySQL root user for server_hostname domain
   community.mysql.mysql_user:
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "{{ ansible_fqdn }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   failed_when: false
 
 - name: Removes the MySQL test database
   community.mysql.mysql_db:
     db: test
     state: absent
+    login_unix_socket: /var/run/mysqld/mysqld.sock
   notify: Restart mariadb
 
 - name: Adds ferm filtering
