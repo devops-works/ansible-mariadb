@@ -90,6 +90,11 @@ mariadb_custom: {}
 # skip restart in handler
 mariadb_skip_restart: false
 
+mariadb_influxevent_timeout: 7200
+mariadb_influxevent_period: 1000
+mariadb_influxevent_influx_timeout: 5000
+mariadb_influxevent_influx_retries: 3
+
 mariadb_influx_tags:
   customer: replaceme
   env: dev

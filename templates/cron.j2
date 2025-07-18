@@ -8,7 +8,7 @@ INFLUX_TAGS="{{ mariadb_influx_tags.items()|map("join", "=")|join(",") }}"
 INFLUX_USER="{{ telegraf_output_influxdb.username }}"
 INFLUX_PASS="{{ telegraf_output_influxdb.password }}"
 {# Requires influxevent > v0.14.5 #}
-{{ mariadb_backup_cron_time }} root /usr/local/bin/influxevent -timeout 7200 -period 1000 -lock_file /tmp/dbbackup.lock -- /usr/local/bin/database_backup -v >> /var/log/dbbackup.log 2>&1
+{{ mariadb_backup_cron_time }} root /usr/local/bin/influxevent -timeout {{ mariadb_influxevent_timeout }} -period {{ mariadb_influxevent_period }} -influx_timeout {{ mariadb_influxevent_influx_timeout }} -influx_retries {{ mariadb_influxevent_influx_retries }} -lock_file /tmp/dbbackup.lock -- /usr/local/bin/database_backup -v >> /var/log/dbbackup.log 2>&1
 {% else %}
 {{ mariadb_backup_cron_time }} root /usr/local/bin/database_backup -v >> /var/log/dbbackup.log 2>&1
 {% endif %}
