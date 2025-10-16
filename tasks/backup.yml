@@ -22,7 +22,57 @@
   changed_when: '"imported" in __mariadb_gpgkeys.stderr'
   register: __mariadb_gpgkeys
   loop: "{{ mariadb_backup_gpg_keys }}"
-  tags: keys
+  tags: 
+    - keys
+
+- name: Add gpg update script
+  ansible.builtin.template:
+    src: update-backup-keys.sh.j2
+    dest: /usr/local/bin/update-backup-keys
+    mode: "0700"
+    owner: root
+    group: root
+  tags: 
+    - keys
+    - keys:update
+
+- name: Add gpg update script config
+  ansible.builtin.template:
+    src: dot.gpg-key-updates.conf.j2
+    dest: /root/.gpg-key-updates.conf
+    mode: "0600"
+    owner: root
+    group: root
+  tags:
+    - keys
+    - keys:update
+
+- name: Add logrotate entry for gpg key update
+  ansible.builtin.template:
+    src: logrotate_gpgkeyupdate.j2
+    dest: /etc/logrotate.d/gpg_key_update
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - logrotate
+    - keys
+    - keys:update
+
+- name: Add cron entry for gpg key update
+  ansible.builtin.cron:
+    name: "Update GPG keys for database backup"
+    job: "/usr/local/bin/update-backup-keys >> /var/log/gpg-key-update.log"
+    state: present
+    minute: "57"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+  tags:
+    - cron
+    - keys
+    - keys:update
 
 - name: Ensures backup destination exists
   ansible.builtin.file:

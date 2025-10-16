@@ -1,0 +1,11 @@
+# File format
+#0x1234567890ABCDEF|https://example.com/keys/user1.asc
+#0xFEDCBA0987654321|https://example.org/keys/user2.asc
+
+{% for entry in mariadb_backup_gpg_keys -%}
+{%- set key_id = entry.id | trim -%}
+{%- if key_id[:2]|lower != '0x' -%}
+{%- set key_id = '0x' ~ key_id -%}
+{%- endif -%}
+{{ key_id }}|{{ entry.url }}
+{% endfor %}
