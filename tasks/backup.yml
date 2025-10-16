@@ -26,8 +26,8 @@
     - keys
 
 - name: Add gpg update script
-  ansible.builtin.template:
-    src: update-backup-keys.sh.j2
+  ansible.builtin.copy:
+    src: update-backup-keys.sh
     dest: /usr/local/bin/update-backup-keys
     mode: "0700"
     owner: root
