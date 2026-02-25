@@ -58,6 +58,7 @@ for j in ${DB}; do
   if [ {{ mariadb_backup_gpg_keys | length }} -gt 0 ]; then
     # Encrypt
     [[ $1 == '-v' ]] && log "encrypting ${DEST}/$j-${DATE}.sql.zst"
+    sync
     gpg --encrypt ${GPG_RCPT} --compress-algo none --trust-model always "${DEST}/$j-${DATE}.sql.zst" || errors=$((errors + 1)) 
     mv "${DEST}/$j-${DATE}.sql.zst.gpg" ${DEST_ENCRYPTED}/ || errors=$((errors + 1))
     # Remove old encrypted backups
