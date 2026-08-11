@@ -24,8 +24,10 @@ mariadb_bind_interface: false
 mariadb_data_dir: /var/lib/mysql
 mariadb_binlog_dir: /var/lib/mysql
 mariadb_expire_logs_days: 1
-mariadb_ferm_enabled: ferm_enabled | default(false)
-mariadb_nftables_enabled: nftables_enabled | default(false)
+mariadb_ferm_enabled: "{{ ferm_enabled | default(false) | bool }}"
+mariadb_nftables_enabled: "{{ nftables_enabled | default(false) | bool }}"
+# Table the nftables role owns; must match its nft_table_name
+mariadb_nft_table_name: "{{ nft_table_name | default('fw') }}"
 
 mariadb_filter_allow_mariadb_port: []
 mariadb_key_buffer: "16M"

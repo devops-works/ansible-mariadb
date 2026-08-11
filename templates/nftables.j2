@@ -1,17 +1,53 @@
 {% import 'variables.inc' as var with context %}
-{% if var.mysql_allow | length > 0 or (mariadb_replicas_group is defined and mariadb_replicas_group and inventory_hostname not in groups[mariadb_replicas_group]) %}
+{# Set structure + rules only. Elements live in nftables_elements.j2 so       #}
+{# addresses can be updated without flushing the whole ruleset.              #}
+{% set replicas = mariadb_replicas_group is defined and mariadb_replicas_group and inventory_hostname not in groups[mariadb_replicas_group] %}
+{% set clients_v4 = var.mysql_allow_v4 | unique | list %}
+{% set clients_v6 = var.mysql_allow_v6 | unique | list %}
+{% set replicas_v4 = var.replicas_list_v4 | unique | list if replicas else [] %}
+{% set replicas_v6 = var.replicas_list_v6 | unique | list if replicas else [] %}
+{% if (clients_v4 | length + clients_v6 | length + replicas_v4 | length + replicas_v6 | length) > 0 %}
+#!/usr/sbin/nft -f
 
-table ip filter {
-    chain INPUT {
-{% if var.mysql_allow | length > 0 %}
-      # Allow access to clients
-      tcp dport { {{ mariadb_port }} } ip saddr { {{ var.mysql_allow | unique | join(", ") }} } counter accept comment "allowed mysql clients"
+table inet {{ mariadb_nft_table_name }} {
+{% if clients_v4 | length > 0 %}
+    set mariadb_clients_v4 {
+        type ipv4_addr
+        flags interval
+    }
 {% endif %}
-{% if mariadb_replicas_group is defined and mariadb_replicas_group and inventory_hostname not in groups[mariadb_replicas_group]%}
-      # Allow access to replica
-      tcp dport { {{ mariadb_port }} } ip saddr { {{ var.replicas_list | unique | join(", ") }} } counter accept comment "allowed mysql replicas"
+{% if clients_v6 | length > 0 %}
+    set mariadb_clients_v6 {
+        type ipv6_addr
+        flags interval
+    }
+{% endif %}
+{% if replicas_v4 | length > 0 %}
+    set mariadb_replicas_v4 {
+        type ipv4_addr
+        flags interval
+    }
+{% endif %}
+{% if replicas_v6 | length > 0 %}
+    set mariadb_replicas_v6 {
+        type ipv6_addr
+        flags interval
+    }
+{% endif %}
+    chain input {
+        type filter hook input priority 0; policy drop;
+{% if clients_v4 | length > 0 %}
+        tcp dport { {{ mariadb_port }} } ip saddr @mariadb_clients_v4 counter accept comment "allowed mysql clients (v4)"
+{% endif %}
+{% if clients_v6 | length > 0 %}
+        tcp dport { {{ mariadb_port }} } ip6 saddr @mariadb_clients_v6 counter accept comment "allowed mysql clients (v6)"
+{% endif %}
+{% if replicas_v4 | length > 0 %}
+        tcp dport { {{ mariadb_port }} } ip saddr @mariadb_replicas_v4 counter accept comment "allowed mysql replicas (v4)"
+{% endif %}
+{% if replicas_v6 | length > 0 %}
+        tcp dport { {{ mariadb_port }} } ip6 saddr @mariadb_replicas_v6 counter accept comment "allowed mysql replicas (v6)"
 {% endif %}
     }
 }
-
 {% endif %}

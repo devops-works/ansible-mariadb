@@ -1,0 +1,29 @@
+#!/usr/sbin/nft -f
+{% import 'variables.inc' as var with context %}
+{# Set elements only, so addresses can be updated with `nft -f` without      #}
+{# flushing the whole ruleset. Set structure lives in nftables.j2.           #}
+{% set replicas = mariadb_replicas_group is defined and mariadb_replicas_group and inventory_hostname not in groups[mariadb_replicas_group] %}
+{% set clients_v4 = var.mysql_allow_v4 | unique | list %}
+{% set clients_v6 = var.mysql_allow_v6 | unique | list %}
+{% set replicas_v4 = var.replicas_list_v4 | unique | list if replicas else [] %}
+{% set replicas_v6 = var.replicas_list_v6 | unique | list if replicas else [] %}
+{% if clients_v4 | length > 0 %}
+
+flush set inet {{ mariadb_nft_table_name }} mariadb_clients_v4
+add element inet {{ mariadb_nft_table_name }} mariadb_clients_v4 { {{ clients_v4 | join(", ") }} }
+{% endif %}
+{% if clients_v6 | length > 0 %}
+
+flush set inet {{ mariadb_nft_table_name }} mariadb_clients_v6
+add element inet {{ mariadb_nft_table_name }} mariadb_clients_v6 { {{ clients_v6 | join(", ") }} }
+{% endif %}
+{% if replicas_v4 | length > 0 %}
+
+flush set inet {{ mariadb_nft_table_name }} mariadb_replicas_v4
+add element inet {{ mariadb_nft_table_name }} mariadb_replicas_v4 { {{ replicas_v4 | join(", ") }} }
+{% endif %}
+{% if replicas_v6 | length > 0 %}
+
+flush set inet {{ mariadb_nft_table_name }} mariadb_replicas_v6
+add element inet {{ mariadb_nft_table_name }} mariadb_replicas_v6 { {{ replicas_v6 | join(", ") }} }
+{% endif %}

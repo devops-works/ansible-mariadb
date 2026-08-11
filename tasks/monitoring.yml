@@ -6,6 +6,7 @@
     priv: '*.*:PROCESS/*.*:REPLICATION CLIENT/*.*:SELECT'
     host: "{{ item }}"
     state: present
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
   with_items:
     - localhost

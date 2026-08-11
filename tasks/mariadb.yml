@@ -93,9 +93,10 @@
 # # In this case, mysql_user will fail connecting to mysql
 - name: Sets the root password (first attempt / failure is ok)
   community.mysql.mysql_user:
-    user: root
+    name: root
     password: "{{ mariadb_root_password }}"
     host: localhost
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Configures for easy access as root user
@@ -106,22 +107,24 @@
 
 # - name: Sets the root password (second attempt)
 #   mysql_user:
-#     user: root
+#     name: root
 #     password: "{{ mariadb_root_password }}"
 #     host: localhost
 #   ignore_errors: yes
 
 - name: Deletes anonymous MySQL server user for ansible_fqdn
   community.mysql.mysql_user:
-    user: ""
+    name: ""
     host: "{{ ansible_facts.fqdn }}"
     state: "absent"
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Deletes anonymous MySQL server user for localhost
   community.mysql.mysql_user:
-    user: ""
+    name: ""
     state: "absent"
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Adds required MySQL users
@@ -129,6 +132,7 @@
     name: "{{ item.name }}"
     password: "{{ item.password }}"
     priv: "{{ item.privs }}"
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
   with_items: [ "{{ mariadb_users }}" ]
   when: mariadb_users is defined
@@ -139,6 +143,7 @@
     password: "{{ item.password }}"
     priv: "{{ item.privs }}"
     host: "{{ item.host }}"
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
   with_items: [ "{{ mariadb_users }}" ]
   when: item.host is defined and mariadb_users is defined
@@ -148,6 +153,7 @@
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "::1"
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Secures the MySQL root user for IPV4 localhost (127.0.0.1)
@@ -155,6 +161,7 @@
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "127.0.0.1"
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Secures the MySQL root user for localhost domain (localhost)
@@ -162,6 +169,7 @@
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "localhost"
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Secures the MySQL root user for server_hostname domain
@@ -169,6 +177,7 @@
     name: "root"
     password: "{{ mariadb_root_password }}"
     host: "{{ ansible_facts.fqdn }}"
+    column_case_sensitive: true
     login_unix_socket: /var/run/mysqld/mysqld.sock
   failed_when: false
 
@@ -186,17 +195,37 @@
     mode: "0644"
     owner: root
     group: root
-  when: mariadb_ferm_enabled
+  when: mariadb_ferm_enabled | bool
   tags: ferm
   notify: Restart ferm
+
+# Pre-refactoring nftables role location. The directory now belongs to the
+# nftables role, and the include glob only matches *.nft, so this file was
+# inert; remove it to avoid confusion.
+- name: Removes legacy nftables filtering drop-in
+  ansible.builtin.file:
+    path: /etc/nftables.d/pre/60_mysql.conf
+    state: absent
+  tags: nftables
 
 - name: Adds nftables filtering
   ansible.builtin.template:
     src: nftables.j2
-    dest: /etc/nftables.d/pre/60_mysql.conf
+    dest: /etc/nftables.d/custom/60_mysql.nft
     mode: "0644"
     owner: root
     group: root
-  when: mariadb_nftables_enabled
+  when: mariadb_nftables_enabled | bool
   tags: nftables
   notify: Reload nftables
+
+- name: Adds nftables filtering elements
+  ansible.builtin.template:
+    src: nftables_elements.j2
+    dest: /etc/nftables.d/custom/60_mysql_elements.nft
+    mode: "0644"
+    owner: root
+    group: root
+  when: mariadb_nftables_enabled | bool
+  tags: nftables
+  notify: Apply nftables elements

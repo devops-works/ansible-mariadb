@@ -10,7 +10,29 @@
     name: ferm
     state: restarted
 
+# Apply the whole ruleset. nftables.conf only replaces the nftables role's own
+# table (add table / delete table inet <name>), so this never runs
+# `flush ruleset` and leaves other tables (e.g. Docker's) alone. We do not
+# restart the service: a restart runs the unit's ExecStop and can flush the
+# ruleset.
 - name: Reload nftables
-  ansible.builtin.systemd:
-    name: nftables
-    state: restarted
+  ansible.builtin.command:
+    cmd: nft -f /etc/nftables.conf
+  changed_when: true
+
+# Apply only our set elements (flush set + add element), updating set
+# membership in the running ruleset without touching rules or counters.
+#
+# `flush set` needs the set to already exist in the kernel. On a fresh host the
+# set is not live yet, `nft -c -f` fails, and we skip: the reload handler above
+# (defined first, so it runs first) or the next boot loads it.
+- name: Apply nftables elements
+  ansible.builtin.shell: |
+    set -e
+    f=/etc/nftables.d/custom/60_mysql_elements.nft
+    if [ -e "$f" ] && nft -c -f "$f" >/dev/null 2>&1; then
+      nft -f "$f"
+    else
+      echo "skipping $f (set not live yet)"
+    fi
+  changed_when: true

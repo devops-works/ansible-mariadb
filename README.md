@@ -13,6 +13,16 @@ It comes with batteries included:
 
 MySQLdb python package (required by `mysql_*` Ansible modules)
 
+`community.mysql` collection >= 3.8.0 (for the `column_case_sensitive` option),
+see `requirements.yml`.
+
+When `mariadb_nftables_enabled` is true, the
+[nftables role](https://github.com/devops-works/ansible-nftables) must be
+applied to the host, at a revision including the `inet` table refactoring: this
+role drops its rules in `/etc/nftables.d/custom/` and expects the
+`table inet fw` / `chain input` layout. Set `mariadb_nft_table_name` if you
+changed the nftables role's `nft_table_name`.
+
 ## Role Variables
 
 ### Backup
