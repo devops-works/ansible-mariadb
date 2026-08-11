@@ -1,12 +1,12 @@
 # Database backup
 MAILTO=""
-{% if telegraf_output_influxdb %}
+{% if "influxdb" in telegraf_outputs %}
 INFLUX_MEASUREMENT=events
-INFLUX_DB={{ telegraf_output_influxdb.database | default("metrics") }}
-INFLUX_URL={{ telegraf_output_influxdb.urls.0 }}
+INFLUX_DB={{ telegraf_outputs.influxdb.database | default("metrics") }}
+INFLUX_URL={{ telegraf_outputs.influxdb.urls.0 }}
 INFLUX_TAGS="{{ mariadb_influx_tags.items()|map("join", "=")|join(",") }}"
-INFLUX_USER="{{ telegraf_output_influxdb.username }}"
-INFLUX_PASS="{{ telegraf_output_influxdb.password }}"
+INFLUX_USER="{{ telegraf_outputs.influxdb.username }}"
+INFLUX_PASS="{{ telegraf_outputs.influxdb.password }}"
 {# Requires influxevent > v0.14.5 #}
 {{ mariadb_backup_cron_time }} root /usr/local/bin/influxevent -timeout {{ mariadb_influxevent_timeout }} -period {{ mariadb_influxevent_period }} -influx_timeout {{ mariadb_influxevent_influx_timeout }} -influx_retries {{ mariadb_influxevent_influx_retries }} -lock_file /tmp/dbbackup.lock -- /usr/local/bin/database_backup -v >> /var/log/dbbackup.log 2>&1
 {% else %}
