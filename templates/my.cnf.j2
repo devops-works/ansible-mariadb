@@ -61,7 +61,7 @@ skip-name-resolve
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
 {% if mariadb_bind_interface %}
-bind-address    = {{ hostvars[inventory_hostname]['ansible_' + mariadb_bind_interface].ipv4.address }}
+bind-address    = {{ hostvars[inventory_hostname]['ansible_facts'][mariadb_bind_interface].ipv4.address }}
 {% else %}
 bind-address    = {{ mariadb_bind_address }}
 {% endif %}
@@ -71,13 +71,13 @@ bind-address    = {{ mariadb_bind_address }}
 {% if mariadb_version is version("10.1", "<=") %}
 {%   if mariadb_key_buffer == "auto" %}
 # key_buffer has been automatically set to 20% of total RAM
-key_buffer         = {{ (ansible_memtotal_mb * 1024 * 1024 * 0.2) | int}}
+key_buffer         = {{ (ansible_facts.memtotal_mb * 1024 * 1024 * 0.2) | int}}
 {%   else %}
 key_buffer         = {{ mariadb_key_buffer }}
 {%   endif %}{% else %}
 {%   if mariadb_key_buffer == "auto" %}
 # key_buffer_size has been automatically set to 20% of total RAM
-key_buffer_size    = {{ (ansible_memtotal_mb * 1024 * 1024 * 0.2) | int}}
+key_buffer_size    = {{ (ansible_facts.memtotal_mb * 1024 * 1024 * 0.2) | int}}
 {%   else %}
 key_buffer_size    = {{ mariadb_key_buffer }}
 {%   endif %}
@@ -216,7 +216,7 @@ max_allowed_packet	= 16M
 [isamchk]
 {% if mariadb_key_buffer == "auto" %}
 # key_buffer has been automatically set to 20% of total RAM
-key_buffer		= {{ (ansible_memtotal_mb * 1024 * 1024 * 0.2) | int}}
+key_buffer		= {{ (ansible_facts.memtotal_mb * 1024 * 1024 * 0.2) | int}}
 {% else %}
 key_buffer		= {{ mariadb_key_buffer }}
 {% endif %}
