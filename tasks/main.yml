@@ -30,7 +30,7 @@
         - mariadb
         - mariadb:client
         - mariadb:replicas
-  when: mariadb_master_host is defined and mariadb_master_host and mariadb_replicas_group in group_names
+  when: mariadb_master_host is defined and mariadb_master_host is truthy and mariadb_replicas_group in group_names
   tags:
     - always
 
@@ -42,7 +42,7 @@
         - mariadb
         - backup
         - mariadb:backup
-  when: mariadb_backup
+  when: mariadb_backup is truthy
   tags:
     - always
 
@@ -53,6 +53,6 @@
       tags:
         - mariadb
         - monitoring
-  when: mariadb_monitoring_user is defined and mariadb_monitoring_user
+  when: mariadb_monitoring_user is defined and mariadb_monitoring_user is truthy
   tags:
     - always

@@ -1,16 +1,22 @@
 ---
+# `lookup('vars', item, ...)` resolves the *value* of the variable named by
+# item. Testing `item` directly only tests the truthiness of the name, which is
+# always true.
 - name: Checking that required variables are set
-  ansible.builtin.fail:
-    msg: "{{ item }} is not defined"
-  when: not item
-  with_items:
+  ansible.builtin.assert:
+    that: lookup('vars', item, default=false) is truthy
+    fail_msg: "{{ item }} must be defined"
+    quiet: true
+  loop:
     - mariadb_root_password
 
 - name: Checking that required variables are set if master/replica setup
-  ansible.builtin.fail:
-    msg: "mariadb_replicas_group, perconna_replication_user and perconna_replication_password must be defined if mariadb_master_host is"
-  when: mariadb_master_host is defined and not item
-  with_items:
+  ansible.builtin.assert:
+    that: lookup('vars', item, default=false) is truthy
+    fail_msg: "{{ item }} must be defined if mariadb_master_host is"
+    quiet: true
+  when: mariadb_master_host is defined and mariadb_master_host is truthy
+  loop:
     - mariadb_bind_interface
     - mariadb_replicas_group
     - mariadb_replication_user
