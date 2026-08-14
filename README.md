@@ -13,8 +13,9 @@ It comes with batteries included:
 
 MySQLdb python package (required by `mysql_*` Ansible modules)
 
-`community.mysql` collection >= 3.8.0 (for the `column_case_sensitive` option),
-see `requirements.yml`.
+`ansible.mariadb` collection (see `requirements.yml`), which supersedes the
+deprecated `community.mysql` (and `ansible.mysql`, which drops MariaDB support
+in its 6.0.0). It requires ansible-core >= 2.16.
 
 When `mariadb_nftables_enabled` is true, the
 [nftables role](https://github.com/devops-works/ansible-nftables) must be

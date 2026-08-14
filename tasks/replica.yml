@@ -7,7 +7,7 @@
     __mariadb_master_ip: "{{ hostvars[mariadb_master_host]['ansible_facts'][mariadb_bind_interface]['ipv4']['address'] }}"
 
 - name: Adds required replication users
-  community.mysql.mysql_user:
+  ansible.mariadb.mariadb_user:
     login_user: root
     login_password: "{{ mariadb_root_password }}"
     name: "{{ mariadb_replication_user }}"
