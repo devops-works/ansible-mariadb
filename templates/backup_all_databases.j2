@@ -102,7 +102,7 @@ fi
 
 if [ -n "{{ mariadb_backup_gcloudbucket }}" ]; then
   [[ $1 == '-v' ]] && log "syncing to gs://{{ mariadb_backup_gcloudbucket }}"
-  gsutil -m rsync -r ${SOURCE} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
+  gcloud storage rsync --recursive ${SOURCE} gs://{{ mariadb_backup_gcloudbucket }}/$(hostname)/
   if [ $? -gt 0 ]; then
     log "error syncing ${SOURCE} to gs://{{ mariadb_backup_gcloudbucket }}"
     exit 1
