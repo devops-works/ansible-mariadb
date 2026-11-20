@@ -47,8 +47,22 @@ It will install a backupscript in `/etc/backup.d/hourly`.
 
 #### Special vars
 
-The required version is set in `mariadb_version`. The default is "5.6"; The only
-other supported version is "5.5".
+The required version is set in `mariadb_version` (default: `"10.5"`). Always
+quote it: unquoted, `10.10` is read as the number `10.1`.
+
+Package names follow the distribution:
+
+- `mariadb_versioned_packages` (default: `true`): install
+  `mariadb-server-<version>` and `mariadb-client-<version>`. Set it to `false`
+  on Debian bookworm and later, where only `mariadb-server` and
+  `mariadb-client` exist
+- `mariadb_server_package`, `mariadb_client_package`: the resulting package
+  names, overridable directly
+
+Command names used by the role and the backup script default to the
+`mariadb-*` names (MariaDB 10.5 and later). For older servers, set
+`mariadb_client_command: mysql`, `mariadb_dump_command: mysqldump` and
+`mariadb_install_db_command: mysql_install_db`.
 
 If defined, `mariadb_bind_interface` takes precedence over
 `mariadb_bind_address`. Note that `mariadb_bind_interface` *must* be defined for
@@ -156,6 +170,10 @@ defined, a mysql user will be created for monitoring.
 
 - `mariadb_monitoring_user`: MySQL user for monitoring integration (default: `false`)
 - `mariadb_monitoring_password`: MySQL user for monitoring integration (default: `false`)
+- `mariadb_monitoring_privs`: privileges of that user (default:
+  `*.*:PROCESS,REPLICATION CLIENT,SLAVE MONITOR,BINLOG MONITOR,SELECT`).
+  `SLAVE MONITOR` and `BINLOG MONITOR` need MariaDB 10.5 or later; drop them
+  for older servers
 
 Usage
 -----

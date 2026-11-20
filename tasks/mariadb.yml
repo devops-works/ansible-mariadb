@@ -6,7 +6,7 @@
 
 - name: Installs mariadb-server
   ansible.builtin.apt:
-    pkg: "mariadb-server-{{ mariadb_version }}"
+    pkg: "{{ mariadb_server_package }}"
     state: present
 
 - name: Installs additional tools
@@ -68,7 +68,7 @@
 
 - name: Initialize datadir if new  # noqa no-handler
   ansible.builtin.command: >
-    /usr/bin/mysql_install_db --datadir={{ mariadb_data_dir }}
+    {{ mariadb_install_db_command }} --datadir={{ mariadb_data_dir }}
     --auth-root-authentication-method=socket
     --rpm --cross-bootstrap --user=mysql
     --disable-log-bin  --skip-test-db
@@ -78,17 +78,10 @@
 - name: Restart mariadb if necessary
   ansible.builtin.meta: flush_handlers
 
-- name: Adds Python2 MySQL support
-  ansible.builtin.apt:
-    pkg: "python-mysqldb"
-    state: present
-  when: ansible_facts.python.version.major == 2
-
-- name: Adds Python3 MySQL support
+- name: Adds Python MySQL support
   ansible.builtin.apt:
     pkg: "python3-pymysql"
     state: present
-  when: ansible_facts.python.version.major == 3
 
 # # In this case, mysql_user will fail connecting to mysql
 - name: Sets the root password (first attempt / failure is ok)

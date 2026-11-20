@@ -36,6 +36,10 @@ mariadb_max_connections: 151
 mariadb_max_allowed_packet: 16M
 mariadb_monitoring_user: false
 mariadb_monitoring_password: false
+# SLAVE MONITOR and BINLOG MONITOR exist since MariaDB 10.5, where SHOW SLAVE
+# STATUS needs the former and REPLICATION CLIENT is an alias of the latter.
+# For older servers: '*.*:PROCESS,REPLICATION CLIENT,SELECT'
+mariadb_monitoring_privs: '*.*:PROCESS,REPLICATION CLIENT,SLAVE MONITOR,BINLOG MONITOR,SELECT'
 # Max in-memory table size (see also mariadb_tmp_table_size)
 mariadb_max_heap_table_size: 16777216
 mariadb_open_files_limit: 2565
@@ -74,7 +78,20 @@ mariadb_users: []
 #     password: "bar",
 #     priv: "*.*:ALL"
 #     host: "somehost"
-mariadb_version: 10.5
+# Always quote it: unquoted, 10.10 is read as the number 10.1
+mariadb_version: "10.5"
+# Debian dropped the versioned package names (mariadb-server-10.5) after
+# bullseye: set this to false there (bookworm, trixie)
+mariadb_versioned_packages: true
+mariadb_server_package: "mariadb-server{{ ('-' ~ mariadb_version) if mariadb_versioned_packages | bool else '' }}"
+mariadb_client_package: "mariadb-client{{ ('-' ~ mariadb_version) if mariadb_versioned_packages | bool else '' }}"
+
+# Command names. The mariadb-* names exist since MariaDB 10.5; the historical
+# mysql* names moved to optional compat packages in recent releases. Set
+# these to mysql, mysqldump and mysql_install_db for older servers.
+mariadb_client_command: mariadb
+mariadb_dump_command: mariadb-dump
+mariadb_install_db_command: mariadb-install-db
 
 #
 # custom mariadb configs

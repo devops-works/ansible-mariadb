@@ -12,7 +12,7 @@ EXCLUDE="{{ mariadb_backup_exclude }}"
 
 GPG_RCPT="{% for entry in mariadb_backup_gpg_keys %}--recipient {{ entry.id }} {% endfor %}"
 
-DB=$(echo "SHOW DATABASES;" | mysql --password="${PASS}" | tail -n +2 | grep -v '^information_schema$' | grep -v '^performance_schema$' | grep -v '^sys$' | grep -v "${EXCLUDE}")
+DB=$(echo "SHOW DATABASES;" | {{ mariadb_client_command }} --password="${PASS}" | tail -n +2 | grep -v '^information_schema$' | grep -v '^performance_schema$' | grep -v '^sys$' | grep -v "${EXCLUDE}")
 
 # ---
 
@@ -37,9 +37,9 @@ set -o pipefail
 for j in ${DB}; do
   [[ $1 == '-v' ]] && log "database ${j} backup" 
   DATE=$(date -u +%Y%m%d_%H%M%S)
-  mysqldump --password="${PASS}" --routines --triggers --single-transaction {{ mariadb_backup_additional_flag }} --max-allowed-packet={{ mariadb_max_allowed_packet}} "${j}" 2> $ERRFILE | tee >(zstd > "${DEST}/$j-${DATE}.sql.zst") | tail -1 > $GREPFILE
+  {{ mariadb_dump_command }} --password="${PASS}" --routines --triggers --single-transaction {{ mariadb_backup_additional_flag }} --max-allowed-packet={{ mariadb_max_allowed_packet}} "${j}" 2> $ERRFILE | tee >(zstd > "${DEST}/$j-${DATE}.sql.zst") | tail -1 > $GREPFILE
   if [ $? != 0 ]; then
-    log "error backuping (mysqldump) ${j} :"
+    log "error backuping ({{ mariadb_dump_command }}) ${j} :"
     cat ${ERRFILE}
     echo
     errors=$((errors + 1))

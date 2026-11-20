@@ -3,7 +3,7 @@
   ansible.mariadb.mariadb_user:
     name: "{{ mariadb_monitoring_user }}"
     password: "{{ mariadb_monitoring_password }}"
-    priv: '*.*:PROCESS/*.*:REPLICATION CLIENT/*.*:SELECT'
+    priv: "{{ mariadb_monitoring_privs }}"
     host: "{{ item }}"
     state: present
     column_case_sensitive: true

@@ -1,4 +1,4 @@
 ---
 - name: Installs mariadb client libs
   ansible.builtin.apt:
-    pkg: "mariadb-client-{{ mariadb_version }}"
+    pkg: "{{ mariadb_client_package }}"
